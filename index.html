@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHARLES_DEV_RECORDS</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght=0,400;0,700;1,400&family=Bebas+Neue&family=IBM+Plex+Mono:wght=300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <!-- NAV -->
+    <nav>
+        <a href="#" class="nav-logo">&gt;_ <span>CHARLES_DEV_RECORDS</span></a>
+        <div class="nav-links">
+            <a href="#hero">LINE-UP</a>
+            <a href="#about">BACKSTAGE</a>
+            <a href="#equalizer">ÉGALISEUR</a>
+            <a href="#booking">BOOKING</a>
+        </div>
+        <button class="nav-play" aria-label="Play">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="5,3 19,12 5,21" />
+            </svg>
+        </button>
+    </nav>
+
+    <!-- HERO -->
+    <section id="hero">
+        <div class="hero-glow"></div>
+
+        <!-- Left speaker -->
+        <div class="speaker left">
+            <div class="speaker-box">
+                <div class="speaker-cone"></div>
+                <div class="speaker-cone2"></div>
+                <div class="speaker-cone3"></div>
+            </div>
+        </div>
+
+        <h1 class="hero-title">CODE <span class="amp">&amp;</span> MUSIQUE</h1>
+        <div class="live-badge">
+            <span class="live-dot"></span>
+            LIVE SETLIST
+        </div>
+
+        <!-- Carousel -->
+        <div class="carousel-wrap">
+            <button class="carousel-btn prev" onclick="slide(-1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15,18 9,12 15,6" />
+                </svg>
+            </button>
+            <div class="carousel">
+                <div class="carousel-inner" id="carouselInner">
+
+                    <div class="slide">
+                        <div class="slide-img">
+                            <div class="code-preview">
+                                <span class="kw">const</span> beatbox = <span class="kw">new</span> <span
+                                    class="fn">BeatboxAPI</span>()<br>
+                                beatbox.<span class="fn">init</span>({ port: <span class="str">3000</span> })<br><br>
+                                router.<span class="fn">post</span>('/samples', <span class="kw">async</span> (req, res)
+                                => {<br>
+                                &nbsp;&nbsp;<span class="kw">const</span> sample = <span class="kw">await</span>
+                                Sample.<span class="fn">create</span>(req.body)<br>
+                                &nbsp;&nbsp;res.<span class="fn">json</span>({ success: <span class="kw">true</span>,
+                                sample })<br>
+                                })
+                            </div>
+                        </div>
+                        <div class="slide-title">Forum</div>
+                        <div class="slide-desc">Réalisation d'un forum</div>
+                        <div class="slide-tags">
+                            <span class="tag">SQLite</span>
+                            <span class="tag">HTML/CSS</span>
+                            <span class="tag">JS</span>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-img">
+                            <div class="code-preview">
+                                <span class="kw">import</span> { <span class="fn">useAudioContext</span> } <span
+                                    class="kw">from</span> '@/hooks'<br><br>
+                                <span class="kw">export default function</span> <span class="fn">Synth</span>() {<br>
+                                &nbsp;&nbsp;<span class="kw">const</span> { play, stop } = <span
+                                    class="fn">useAudioContext</span>()<br><br>
+                                &nbsp;&nbsp;<span class="kw">return</span> &lt;<span class="fn">SynthBoard</span>
+                                onKey={play} /&gt;<br>
+                                }
+                            </div>
+                        </div>
+                        <div class="slide-title">Profily</div>
+                        <div class="slide-desc">Une IA pour trouver la meilleure entreprise</div>
+                        <div class="slide-tags">
+                            <span class="tag">React</span>
+                            <span class="tag">Web Audio API</span>
+                            <span class="tag">TypeScript</span>
+                        </div>
+                    </div>
+
+                    <div class="slide">
+                        <div class="slide-img">
+                            <div class="code-preview">
+                                <span class="kw">class</span> <span class="fn">Make your game</span> {<br>
+                                &nbsp;&nbsp;<span class="fn">constructor</span>() {<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">this</span>.tracks = []<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">this</span>.master = <span
+                                    class="str">1.0</span><br>
+                                &nbsp;&nbsp;}<br>
+                                &nbsp;&nbsp;<span class="fn">mix</span>(tracks) { <span class="kw">return</span> <span
+                                    class="kw">this</span>.<span class="fn">render</span>(tracks) }<br>
+                                }
+                            </div>
+                        </div>
+                        <div class="slide-title">TRACK MIXER</div>
+                        <div class="slide-desc">Application de mixage audio en temps réel avec Python &amp; Flask.</div>
+                        <div class="slide-tags">
+                            <span class="tag">Python</span>
+                            <span class="tag">Flask</span>
+                            <span class="tag">WebSockets</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <button class="carousel-btn next" onclick="slide(1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9,6 15,12 9,18" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Right speaker -->
+        <div class="speaker right">
+            <div class="speaker-box">
+                <div class="speaker-cone"></div>
+                <div class="speaker-cone2"></div>
+                <div class="speaker-cone3"></div>
+            </div>
+        </div>
+
+        <div class="scroll-arrow">∨</div>
+    </section>
+
+    <!-- ABOUT / BACKSTAGE -->
+    <section id="about">
+        <div class="about-grid">
+            <!-- VIP Card -->
+            <div class="vip-card reveal">
+                <div class="vip-header">
+                    <div>
+                        <div class="vip-label">VIP ACCESS</div>
+                        <div class="vip-title">BACKSTAGE</div>
+                    </div>
+                    <div class="vip-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="vip-photo">
+                    <img src="photo CV.jpg" alt="Photo profil">
+                </div>
+                <div class="vip-rows">
+                    <div class="vip-row"><span class="vip-row-label">
+                            <Img:s></Img:s>Identité :
+                        </span><span class="vip-row-val">Charles Gillet</span></div>
+                    <div class="vip-row"><span class="vip-row-label">Ville :</span><span
+                            class="vip-row-val">Rouen</span></div>
+                    <div class="vip-row"><span class="vip-row-label">Rôle :</span><span class="vip-row-val">Dev
+                            Fullstack</span></div>
+                    <div class="vip-row"><span class="vip-row-label">
+                            <Img:s></Img:s>GitHub :
+                        </span><a href="https://github.com/CG19z01" target="_blank"
+                            class="vip-row-val">https://github.com/CG19z01</a></div>
+
+                </div>
+                <div class="barcode" id="barcode"></div>
+            </div>
+
+            <!-- Text -->
+            <div class="about-text reveal">
+                <div class="section-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
+                        <path
+                            d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
+                    </svg>
+                    À PROPOS DE MOI
+                </div>
+                <h2 class="about-headline">
+                    CODER N'EST PAS<br>JUSTE TAPER.<br>
+                    <span class="purple">C'EST COMPOSER.</span>
+                </h2>
+                <p class="about-body">
+                    Je vois le code comme une partition. Chaque fonction est un instrument, chaque ligne de CSS donne le
+                    rythme, et chaque projet raconte une histoire. Mes applications ne se contentent pas de fonctionner
+                    : elles résonnent avec l'utilisateur.
+                </p>
+                <a href="#booking" class="btn-primary">
+                    LET'S JAM TOGETHER
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- EQUALIZER / SKILLS -->
+    <section id="equalizer">
+        <div class="section-header reveal">
+            <div class="section-label-top">
+                <span>&lt;/&gt;</span> L'ÉQUIPEMENT
+            </div>
+            <h2 class="section-headline">ÉGALISEUR DE <span class="purple">COMPÉTENCES</span></h2>
+        </div>
+
+        <div class="eq-panel reveal">
+            <div class="eq-topbar">
+                <div class="eq-dots">
+                    <div class="eq-dot r"></div>
+                    <div class="eq-dot y"></div>
+                    <div class="eq-dot g"></div>
+                </div>
+                <div class="eq-studio"><span>●</span> STUDIO A // MASTER MIX</div>
+            </div>
+
+            <div class="eq-bars" id="eqBars">
+                <!-- Bars injected by JS -->
+            </div>
+
+            <div class="eq-footer">
+                <div>
+                    <div class="eq-status"><span>●</span> SYS ONLINE</div>
+                    <div class="eq-status">FREQ: 440HZ // CH: 1</div>
+                </div>
+                <div style="text-align:center">
+                    <div class="eq-knob-label">MASTER VOL</div>
+                    <div class="eq-knob">
+                        <div class="eq-knob-inner">
+                            <div class="eq-knob-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BOOKING / CONTACT -->
+    <section id="booking">
+        <div class="section-header reveal">
+            <div class="section-label-top">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                    style="display:inline;vertical-align:middle">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                    <polyline points="22,6 12,13 2,6" />
+                </svg>
+                CONTACT
+            </div>
+            <h2 class="section-headline">BOOKER UNE <span class="purple">DATE</span></h2>
+            <p style="margin-top:1rem;font-size:.75rem;color:var(--muted)">Prêt pour une nouvelle collaboration ?
+                Laissez-moi un message.</p>
+        </div>
+
+        <div class="contact-form-wrap reveal">
+            <form action="https://formspree.io/f/xbdbggav" method="POST">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">NOM / NOM DE SCÈNE</label>
+                        <input type="text" class="form-input" name="nom" placeholder="Daft Punk" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">EMAIL</label>
+                        <input type="email" class="form-input" name="email" placeholder="contact@studio.com" required>
+                    </div>
+                    <div class="form-group full">
+                        <label class="form-label">LE PROJET (TRACKLIST)</label>
+                        <textarea class="form-textarea" name="projet"
+                            placeholder="Parlez-moi de votre prochain hit web..." required></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">
+                    ENVOYER LA DÉMO
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-copy">© 2026 Code // Records. Tous droits réservés.</div>
+        <div class="footer-made">Made with ♫ and Code.</div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="main.js"></script>
+</body>
+
+</html>
