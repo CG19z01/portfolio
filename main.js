@@ -52,6 +52,7 @@ const skills = [
     { name: 'JavaScript', pct: 85 },
     { name: 'HTML / CSS', pct: 70 },
     { name: 'Rust', pct: 30 },
+    { name: 'Docker', pct: 45 },
     { name: 'SQLite', pct: 40 },
 ];
 

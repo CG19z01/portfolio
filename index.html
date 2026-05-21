@@ -64,18 +64,7 @@
 
                     <div class="slide">
                         <div class="slide-img">
-                            <div class="code-preview">
-                                <span class="kw">const</span> beatbox = <span class="kw">new</span> <span
-                                    class="fn">BeatboxAPI</span>()<br>
-                                beatbox.<span class="fn">init</span>({ port: <span class="str">3000</span> })<br><br>
-                                router.<span class="fn">post</span>('/samples', <span class="kw">async</span> (req, res)
-                                => {<br>
-                                &nbsp;&nbsp;<span class="kw">const</span> sample = <span class="kw">await</span>
-                                Sample.<span class="fn">create</span>(req.body)<br>
-                                &nbsp;&nbsp;res.<span class="fn">json</span>({ success: <span class="kw">true</span>,
-                                sample })<br>
-                                })
-                            </div>
+                            <img src="maquette_forum.png" alt="Forum mockup">
                         </div>
                         <div class="slide-title">Forum</div>
                         <div class="slide-desc">Réalisation d'un forum</div>
@@ -88,16 +77,7 @@
 
                     <div class="slide">
                         <div class="slide-img">
-                            <div class="code-preview">
-                                <span class="kw">import</span> { <span class="fn">useAudioContext</span> } <span
-                                    class="kw">from</span> '@/hooks'<br><br>
-                                <span class="kw">export default function</span> <span class="fn">Synth</span>() {<br>
-                                &nbsp;&nbsp;<span class="kw">const</span> { play, stop } = <span
-                                    class="fn">useAudioContext</span>()<br><br>
-                                &nbsp;&nbsp;<span class="kw">return</span> &lt;<span class="fn">SynthBoard</span>
-                                onKey={play} /&gt;<br>
-                                }
-                            </div>
+                            <img src="maquette_profily.png" alt="Profily mockup">
                         </div>
                         <div class="slide-title">Profily</div>
                         <div class="slide-desc">Une IA pour trouver la meilleure entreprise</div>
@@ -110,17 +90,7 @@
 
                     <div class="slide">
                         <div class="slide-img">
-                            <div class="code-preview">
-                                <span class="kw">class</span> <span class="fn">Make your game</span> {<br>
-                                &nbsp;&nbsp;<span class="fn">constructor</span>() {<br>
-                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">this</span>.tracks = []<br>
-                                &nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">this</span>.master = <span
-                                    class="str">1.0</span><br>
-                                &nbsp;&nbsp;}<br>
-                                &nbsp;&nbsp;<span class="fn">mix</span>(tracks) { <span class="kw">return</span> <span
-                                    class="kw">this</span>.<span class="fn">render</span>(tracks) }<br>
-                                }
-                            </div>
+                            <img src="travail_en_cours.png" alt="Track Mixer mockup">
                         </div>
                         <div class="slide-title">TRACK MIXER</div>
                         <div class="slide-desc">Application de mixage audio en temps réel avec Python &amp; Flask.</div>
