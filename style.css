@@ -357,6 +357,7 @@ nav {
     border: 1px solid var(--border);
     border-radius: 100px;
     color: var(--muted);
+    text-decoration: none;
     transition: all .2s;
 }
 
