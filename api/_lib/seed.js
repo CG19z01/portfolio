@@ -7,7 +7,7 @@ const projects = [
     title: 'Forum',
     desc: "Réalisation d'un forum",
     img: 'maquette_forum.png',
-    tags: ['SQLite', 'HTML/CSS', 'JS'],
+    tags: ['HTML/CSS', 'JS'],
     githubUrl: '',
     demoUrl: '',
   },
@@ -23,7 +23,7 @@ const projects = [
   {
     id: 'track-mixer',
     title: 'TRACK MIXER',
-    desc: 'Application de mixage audio en temps réel avec Python & Flask.',
+    desc: 'Application en cours de devellopement, nous en parlerons bientot...',
     img: 'travail_en_cours.png',
     tags: ['Python', 'Flask', 'WebSockets'],
     githubUrl: '',
