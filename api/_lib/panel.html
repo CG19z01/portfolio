@@ -4,64 +4,189 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght=300;400;600&display=swap">
 <style>
-  :root { color-scheme: dark; }
+  :root {
+    --purple: #A30DAD;
+    --purple-dark: #6F0EAD;
+    --bg: #0d0d0f;
+    --bg2: #131318;
+    --bg3: #1a1a22;
+    --bg-glow: #2b0b3d;
+    --text: #f0eefa;
+    --muted: #6b6880;
+    --border: #2a2a3a;
+    --danger: #e0455f;
+    --danger-dark: #7a1414;
+  }
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: #0d0d0f;
-    color: #f0eefa;
-    padding: 2rem 1rem 4rem;
+    font-family: 'IBM Plex Mono', monospace;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(163, 13, 173, .12) 0%, transparent 45%),
+      var(--bg);
+    background-attachment: fixed;
+    color: var(--text);
+    min-height: 100vh;
   }
-  h1 { font-size: 1.2rem; margin-bottom: 1.5rem; }
-  h2 { font-size: 1rem; margin: 2rem 0 .75rem; color: #A30DAD; }
-  .wrap { max-width: 720px; margin: 0 auto; }
-  .card {
-    background: #131318;
-    border: 1px solid #2a2a3a;
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 60px;
+    background: rgba(13, 13, 15, .85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: .1em;
+  }
+  .brand .purple { color: var(--purple); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+  h1 { font-size: 1.4rem; margin: 0 0 .25rem; }
+  h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: .06em;
+    margin: 3rem 0 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  h2::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--purple);
+    box-shadow: 0 0 8px var(--purple);
+  }
+  h2:first-of-type { margin-top: 0; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .empty {
+    color: var(--muted);
+    font-size: .78rem;
+    padding: 1.5rem;
+    border: 1px dashed var(--border);
     border-radius: 8px;
-    padding: 1rem;
-    margin-bottom: .75rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
   }
-  .row { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: .5rem; }
-  label { display: block; font-size: .7rem; color: #6b6880; margin-bottom: .25rem; }
+
+  .card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .2s;
+  }
+  .card:hover { border-color: #3a3a52; }
+  .card-thumb {
+    height: 110px;
+    background: linear-gradient(135deg, #1a1225, #0d0d1a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .card-thumb .ph { color: var(--muted); font-size: .65rem; letter-spacing: .1em; }
+  .card-body { padding: .9rem 1rem 1rem; flex: 1; display: flex; flex-direction: column; }
+  .card-title { font-size: .85rem; font-weight: 600; margin-bottom: .3rem; }
+  .card-desc { font-size: .72rem; color: var(--muted); line-height: 1.5; margin-bottom: .6rem; flex: 1; }
+  .card-tags { display: flex; flex-wrap: wrap; gap: .35rem; margin-bottom: .8rem; }
+  .pill {
+    font-size: .6rem;
+    letter-spacing: .05em;
+    padding: .2rem .6rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+  }
+  .card-pct { font-size: 1.6rem; font-family: 'Bebas Neue', sans-serif; color: var(--purple); letter-spacing: .04em; }
+  .card-actions { display: flex; gap: .5rem; }
+
+  form.card { padding: 1.25rem; }
+  .form-title { font-size: .8rem; color: var(--muted); letter-spacing: .1em; margin-bottom: 1rem; text-transform: uppercase; }
+  .row { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: .85rem; }
+  .field { flex: 1; min-width: 160px; }
+  label { display: block; font-size: .65rem; letter-spacing: .08em; color: var(--muted); margin-bottom: .35rem; text-transform: uppercase; }
   input, textarea {
     width: 100%;
-    background: #0d0d0f;
-    border: 1px solid #2a2a3a;
-    color: #f0eefa;
-    border-radius: 4px;
-    padding: .5rem;
-    font-size: .85rem;
+    background: #0d0d15;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: .65rem .75rem;
+    font-size: .8rem;
     font-family: inherit;
+    outline: none;
+    transition: border-color .2s;
   }
+  input:focus, textarea:focus { border-color: var(--purple); }
+  input[type="file"] { padding: .5rem; font-size: .72rem; }
+
   button {
-    background: #A30DAD;
+    background: var(--purple-dark);
     color: #fff;
     border: none;
-    border-radius: 4px;
-    padding: .5rem 1rem;
-    font-size: .8rem;
+    border-radius: 6px;
+    padding: .6rem 1.1rem;
+    font-size: .72rem;
+    letter-spacing: .05em;
+    font-family: inherit;
     cursor: pointer;
+    transition: all .2s;
   }
-  button.secondary { background: #2a2a3a; }
-  button.danger { background: #7a1414; }
-  .field { flex: 1; min-width: 140px; }
-  .actions { display: flex; gap: .5rem; margin-top: .5rem; }
-  #loginView { max-width: 320px; margin: 4rem auto; }
-  .error { color: #ff6b6b; font-size: .8rem; margin-top: .5rem; min-height: 1em; }
-  .hidden { display: none; }
-  .thumb { max-width: 80px; max-height: 60px; display: block; margin-top: .25rem; border-radius: 4px; }
-  .topbar { display: flex; justify-content: space-between; align-items: center; }
+  button:hover { background: var(--purple); }
+  button.secondary { background: var(--bg2); border: 1px solid var(--border); color: var(--text); }
+  button.secondary:hover { background: #23232e; border-color: #3a3a52; }
+  button.danger { background: transparent; border: 1px solid var(--danger-dark); color: var(--danger); }
+  button.danger:hover { background: var(--danger-dark); color: #fff; }
+  button.small { padding: .4rem .75rem; font-size: .68rem; flex: 1; }
+
+  .actions { display: flex; gap: .6rem; margin-top: .25rem; }
+  .error { color: var(--danger); font-size: .72rem; margin-top: .6rem; min-height: 1em; }
+  .hidden { display: none !important; }
+
+  #loginView { max-width: 320px; margin: 4.5rem auto 0; }
+  #loginView .card { padding: 1.75rem 1.5rem; border-color: var(--purple); box-shadow: 0 0 40px rgba(163, 13, 173, .12); }
+  #loginView h1 { text-align: center; font-family: 'Bebas Neue', sans-serif; letter-spacing: .08em; font-size: 1.6rem; margin-bottom: 1.25rem; }
+  #loginView button { width: 100%; padding: .75rem; }
+
+  .top-actions { display: flex; justify-content: space-between; align-items: center; }
 </style>
 </head>
 <body>
+
+<div class="topbar">
+  <div class="brand"><span class="purple">ADMIN</span> // PORTFOLIO</div>
+  <button class="secondary hidden" id="logoutBtn">Déconnexion</button>
+</div>
+
 <div class="wrap">
 
   <div id="loginView">
-    <h1>Connexion admin</h1>
     <div class="card">
+      <h1>Connexion</h1>
       <label for="password">Mot de passe</label>
       <input type="password" id="password" autocomplete="current-password">
       <div class="actions">
@@ -72,14 +197,11 @@
   </div>
 
   <div id="adminView" class="hidden">
-    <div class="topbar">
-      <h1>Panneau admin</h1>
-      <button class="secondary" id="logoutBtn">Déconnexion</button>
-    </div>
 
     <h2>Projets</h2>
-    <div id="projectsList"></div>
-    <div class="card">
+    <div id="projectsList" class="grid"></div>
+    <form class="card" id="projectForm" onsubmit="return false">
+      <div class="form-title" id="projectFormTitle">Nouveau projet</div>
       <div class="row">
         <div class="field"><label>Titre</label><input id="p-title"></div>
         <div class="field"><label>Image (chemin ou URL)</label><input id="p-img"></div>
@@ -102,24 +224,25 @@
       </div>
       <div class="actions">
         <button id="addProjectBtn">Ajouter le projet</button>
-        <button class="secondary hidden" id="cancelProjectBtn">Annuler</button>
+        <button type="button" class="secondary hidden" id="cancelProjectBtn">Annuler</button>
       </div>
       <div class="error" id="projectError"></div>
-    </div>
+    </form>
 
     <h2>Compétences</h2>
-    <div id="skillsList"></div>
-    <div class="card">
+    <div id="skillsList" class="grid"></div>
+    <form class="card" id="skillForm" onsubmit="return false">
+      <div class="form-title" id="skillFormTitle">Nouvelle compétence</div>
       <div class="row">
         <div class="field"><label>Nom</label><input id="s-name"></div>
         <div class="field"><label>% (0-100)</label><input id="s-pct" type="number" min="0" max="100"></div>
       </div>
       <div class="actions">
         <button id="addSkillBtn">Ajouter la compétence</button>
-        <button class="secondary hidden" id="cancelSkillBtn">Annuler</button>
+        <button type="button" class="secondary hidden" id="cancelSkillBtn">Annuler</button>
       </div>
       <div class="error" id="skillError"></div>
-    </div>
+    </form>
   </div>
 
 </div>
@@ -141,6 +264,7 @@ async function api(path, options) {
 function show(view) {
   document.getElementById('loginView').classList.toggle('hidden', view !== 'login');
   document.getElementById('adminView').classList.toggle('hidden', view !== 'admin');
+  document.getElementById('logoutBtn').classList.toggle('hidden', view !== 'admin');
 }
 
 async function checkSession() {
@@ -169,6 +293,10 @@ document.getElementById('loginBtn').addEventListener('click', async () => {
   }
 });
 
+document.getElementById('password').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   await api('/api/logout', { method: 'POST' });
   show('login');
@@ -184,6 +312,7 @@ function resetProjectForm() {
     document.getElementById(id).value = '';
   });
   document.getElementById('p-file').value = '';
+  document.getElementById('projectFormTitle').textContent = 'Nouveau projet';
   document.getElementById('addProjectBtn').textContent = 'Ajouter le projet';
   document.getElementById('cancelProjectBtn').classList.add('hidden');
 }
@@ -196,29 +325,40 @@ function editProject(p) {
   document.getElementById('p-tags').value = (p.tags || []).join(', ');
   document.getElementById('p-github').value = p.githubUrl || '';
   document.getElementById('p-demo').value = p.demoUrl || '';
+  document.getElementById('projectFormTitle').textContent = `Modifier « ${p.title} »`;
   document.getElementById('addProjectBtn').textContent = 'Enregistrer les modifications';
   document.getElementById('cancelProjectBtn').classList.remove('hidden');
-  document.getElementById('p-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('projectForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 async function loadProjects() {
   const projects = await api('/api/projects');
   const list = document.getElementById('projectsList');
   list.innerHTML = '';
+  if (!projects.length) {
+    list.outerHTML = '<div class="empty" id="projectsList">Aucun projet pour le moment.</div>';
+    return;
+  }
   projects.forEach((p) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <strong>${escapeHtml(p.title)}</strong><br>
-      <span style="font-size:.8rem;color:#6b6880">${escapeHtml(p.desc || '')}</span><br>
-      ${p.img ? `<img class="thumb" src="${escapeAttr(p.img)}" alt="">` : ''}
-      <div class="actions">
-        <button class="secondary" data-action="edit">Éditer</button>
-        <button class="danger" data-action="delete">Supprimer</button>
+      <div class="card-thumb">
+        ${p.img ? `<img src="${escapeAttr(p.img)}" alt="">` : '<span class="ph">Pas d\'image</span>'}
+      </div>
+      <div class="card-body">
+        <div class="card-title">${escapeHtml(p.title)}</div>
+        <div class="card-desc">${escapeHtml(p.desc || '')}</div>
+        <div class="card-tags">${(p.tags || []).map((t) => `<span class="pill">${escapeHtml(t)}</span>`).join('')}</div>
+        <div class="card-actions">
+          <button type="button" class="secondary small" data-action="edit">Éditer</button>
+          <button type="button" class="danger small" data-action="delete">Supprimer</button>
+        </div>
       </div>
     `;
     card.querySelector('[data-action="edit"]').addEventListener('click', () => editProject(p));
     card.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+      if (!confirm(`Supprimer le projet « ${p.title} » ?`)) return;
       await api(`/api/projects/${p.id}`, { method: 'DELETE' });
       if (editingProjectId === p.id) resetProjectForm();
       loadProjects();
@@ -275,6 +415,7 @@ function resetSkillForm() {
   editingSkillId = null;
   document.getElementById('s-name').value = '';
   document.getElementById('s-pct').value = '';
+  document.getElementById('skillFormTitle').textContent = 'Nouvelle compétence';
   document.getElementById('addSkillBtn').textContent = 'Ajouter la compétence';
   document.getElementById('cancelSkillBtn').classList.add('hidden');
 }
@@ -283,27 +424,36 @@ function editSkill(s) {
   editingSkillId = s.id;
   document.getElementById('s-name').value = s.name || '';
   document.getElementById('s-pct').value = s.pct;
+  document.getElementById('skillFormTitle').textContent = `Modifier « ${s.name} »`;
   document.getElementById('addSkillBtn').textContent = 'Enregistrer les modifications';
   document.getElementById('cancelSkillBtn').classList.remove('hidden');
-  document.getElementById('s-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('skillForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 async function loadSkills() {
   const skills = await api('/api/skills');
   const list = document.getElementById('skillsList');
   list.innerHTML = '';
+  if (!skills.length) {
+    list.outerHTML = '<div class="empty" id="skillsList">Aucune compétence pour le moment.</div>';
+    return;
+  }
   skills.forEach((s) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
-      <strong>${escapeHtml(s.name)}</strong> — ${s.pct}%
-      <div class="actions">
-        <button class="secondary" data-action="edit">Éditer</button>
-        <button class="danger" data-action="delete">Supprimer</button>
+      <div class="card-body">
+        <div class="card-pct">${s.pct}%</div>
+        <div class="card-title">${escapeHtml(s.name)}</div>
+        <div class="card-actions">
+          <button type="button" class="secondary small" data-action="edit">Éditer</button>
+          <button type="button" class="danger small" data-action="delete">Supprimer</button>
+        </div>
       </div>
     `;
     card.querySelector('[data-action="edit"]').addEventListener('click', () => editSkill(s));
     card.querySelector('[data-action="delete"]').addEventListener('click', async () => {
+      if (!confirm(`Supprimer la compétence « ${s.name} » ?`)) return;
       await api(`/api/skills/${s.id}`, { method: 'DELETE' });
       if (editingSkillId === s.id) resetSkillForm();
       loadSkills();
