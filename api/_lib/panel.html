@@ -162,6 +162,8 @@
   button.danger { background: transparent; border: 1px solid var(--danger-dark); color: var(--danger); }
   button.danger:hover { background: var(--danger-dark); color: #fff; }
   button.small { padding: .4rem .75rem; font-size: .68rem; flex: 1; }
+  button:disabled { opacity: .35; cursor: default; }
+  button:disabled:hover { background: var(--bg2); }
 
   .actions { display: flex; gap: .6rem; margin-top: .25rem; }
   .error { color: var(--danger); font-size: .72rem; margin-top: .6rem; min-height: 1em; }
@@ -339,7 +341,7 @@ async function loadProjects() {
     list.outerHTML = '<div class="empty" id="projectsList">Aucun projet pour le moment.</div>';
     return;
   }
-  projects.forEach((p) => {
+  projects.forEach((p, i) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -351,11 +353,15 @@ async function loadProjects() {
         <div class="card-desc">${escapeHtml(p.desc || '')}</div>
         <div class="card-tags">${(p.tags || []).map((t) => `<span class="pill">${escapeHtml(t)}</span>`).join('')}</div>
         <div class="card-actions">
+          <button type="button" class="secondary small" data-action="up" ${i === 0 ? 'disabled' : ''}>▲</button>
+          <button type="button" class="secondary small" data-action="down" ${i === projects.length - 1 ? 'disabled' : ''}>▼</button>
           <button type="button" class="secondary small" data-action="edit">Éditer</button>
           <button type="button" class="danger small" data-action="delete">Supprimer</button>
         </div>
       </div>
     `;
+    card.querySelector('[data-action="up"]').addEventListener('click', () => moveProject(projects, i, -1));
+    card.querySelector('[data-action="down"]').addEventListener('click', () => moveProject(projects, i, 1));
     card.querySelector('[data-action="edit"]').addEventListener('click', () => editProject(p));
     card.querySelector('[data-action="delete"]').addEventListener('click', async () => {
       if (!confirm(`Supprimer le projet « ${p.title} » ?`)) return;
@@ -365,6 +371,15 @@ async function loadProjects() {
     });
     list.appendChild(card);
   });
+}
+
+async function moveProject(projects, index, delta) {
+  const target = index + delta;
+  if (target < 0 || target >= projects.length) return;
+  const ids = projects.map((p) => p.id);
+  [ids[index], ids[target]] = [ids[target], ids[index]];
+  await api('/api/projects/reorder', { method: 'PUT', body: JSON.stringify({ ids }) });
+  loadProjects();
 }
 
 document.getElementById('cancelProjectBtn').addEventListener('click', resetProjectForm);
