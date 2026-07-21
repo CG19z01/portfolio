@@ -1,6 +1,5 @@
-const { readJson, writeJson } = require('../_lib/store');
+const { writeJson } = require('../_lib/store');
 const { getSession } = require('../_lib/auth');
-const { projects: seedProjects } = require('../_lib/seed');
 
 const STORE_KEY = 'data/projects.json';
 
@@ -16,21 +15,13 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const { ids } = req.body || {};
-  if (!Array.isArray(ids)) {
-    res.status(400).json({ error: 'ids array is required' });
+  const { projects } = req.body || {};
+  const isValid = Array.isArray(projects) && projects.every((p) => p && typeof p.id === 'string');
+  if (!isValid) {
+    res.status(400).json({ error: 'projects array is required' });
     return;
   }
 
-  const projects = await readJson(STORE_KEY, seedProjects);
-  const byId = new Map(projects.map((p) => [p.id, p]));
-  const isValidOrder = ids.length === projects.length && ids.every((id) => byId.has(id));
-  if (!isValidOrder) {
-    res.status(400).json({ error: 'ids must match the existing project ids exactly' });
-    return;
-  }
-
-  const reordered = ids.map((id) => byId.get(id));
-  await writeJson(STORE_KEY, reordered);
-  res.status(200).json(reordered);
+  await writeJson(STORE_KEY, projects);
+  res.status(200).json(projects);
 };

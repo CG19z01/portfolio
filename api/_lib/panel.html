@@ -335,6 +335,10 @@ function editProject(p) {
 
 async function loadProjects() {
   const projects = await api('/api/projects');
+  renderProjects(projects);
+}
+
+function renderProjects(projects) {
   const list = document.getElementById('projectsList');
   list.innerHTML = '';
   if (!projects.length) {
@@ -373,13 +377,16 @@ async function loadProjects() {
   });
 }
 
-async function moveProject(projects, index, delta) {
+function moveProject(projects, index, delta) {
   const target = index + delta;
   if (target < 0 || target >= projects.length) return;
-  const ids = projects.map((p) => p.id);
-  [ids[index], ids[target]] = [ids[target], ids[index]];
-  await api('/api/projects/reorder', { method: 'PUT', body: JSON.stringify({ ids }) });
-  loadProjects();
+  const reordered = projects.slice();
+  [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+  renderProjects(reordered);
+  api('/api/projects/reorder', { method: 'PUT', body: JSON.stringify({ projects: reordered }) }).catch((err) => {
+    alert(`Erreur lors du réordonnancement : ${err.message}`);
+    loadProjects();
+  });
 }
 
 document.getElementById('cancelProjectBtn').addEventListener('click', resetProjectForm);
