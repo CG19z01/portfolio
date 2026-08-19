@@ -46,6 +46,16 @@ body {
     body {
         cursor: none;
     }
+
+    /* The UA stylesheet forces cursor: pointer on links and buttons, which
+       beats the inherited `none` above and puts the hand back. Override it so
+       only the custom cursor shows — the hover equalizer is the click
+       affordance. Text fields keep their caret, still useful for typing. */
+    a,
+    button,
+    .tag {
+        cursor: none;
+    }
 }
 
 /* CUSTOM CURSOR */
