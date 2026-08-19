@@ -1,29 +1,49 @@
-// Custom cursor
-const cursor = document.getElementById('cursor');
-const ring = document.getElementById('cursorRing');
-let mx = window.innerWidth / 2, my = window.innerHeight / 2, rx = mx, ry = my;
+// Custom cursor (fine pointers only — touch devices keep the native cursor)
+if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    const eq = document.getElementById('cursorEq');
+    let mx = window.innerWidth / 2, my = window.innerHeight / 2, rx = mx, ry = my;
 
-// Initialize cursor position
-cursor.style.left = mx + 'px';
-cursor.style.top = my + 'px';
-ring.style.left = rx + 'px';
-ring.style.top = ry + 'px';
-
-document.addEventListener('mousemove', e => {
-    mx = e.clientX;
-    my = e.clientY;
+    // Initialize cursor position
     cursor.style.left = mx + 'px';
     cursor.style.top = my + 'px';
-});
-
-function animateRing() {
-    rx += (mx - rx) * .12;
-    ry += (my - ry) * .12;
     ring.style.left = rx + 'px';
     ring.style.top = ry + 'px';
-    requestAnimationFrame(animateRing);
+    eq.style.left = rx + 'px';
+    eq.style.top = ry + 'px';
+
+    document.addEventListener('mousemove', e => {
+        mx = e.clientX;
+        my = e.clientY;
+        cursor.style.left = mx + 'px';
+        cursor.style.top = my + 'px';
+    });
+
+    function animateRing() {
+        rx += (mx - rx) * .12;
+        ry += (my - ry) * .12;
+        ring.style.left = rx + 'px';
+        ring.style.top = ry + 'px';
+        eq.style.left = rx + 'px';
+        eq.style.top = ry + 'px';
+        requestAnimationFrame(animateRing);
+    }
+    animateRing();
+
+    // Swap the ring for a pulsing equalizer over clickable elements
+    const HOVER_SELECTOR = 'a, button, .tag, input, textarea';
+    document.addEventListener('mouseover', e => {
+        if (e.target.closest(HOVER_SELECTOR)) {
+            document.body.classList.add('cursor-hover');
+        }
+    });
+    document.addEventListener('mouseout', e => {
+        if (e.target.closest(HOVER_SELECTOR) && !e.relatedTarget?.closest(HOVER_SELECTOR)) {
+            document.body.classList.remove('cursor-hover');
+        }
+    });
 }
-animateRing();
 
 function escapeHtml(str) {
     return String(str).replace(/[&<>"']/g, c => ({
