@@ -1,5 +1,6 @@
-// Default content: used to bootstrap the Blob JSON stores on first run,
-// and as the client-side fallback/first-paint data in main.js.
+// Default content: used only to bootstrap the Blob JSON stores on first run.
+// The front-end no longer keeps a copy of this — it renders whatever the API
+// returns, so the admin panel stays the single source of truth.
 
 const projects = [
   {

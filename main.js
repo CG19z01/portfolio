@@ -31,36 +31,6 @@ function escapeHtml(str) {
     }[c]));
 }
 
-// Seed data: matches api/_lib/seed.js. Used for the first paint (no network
-// round-trip needed) and as a fallback if the API fetch fails.
-const seedProjects = [
-    {
-        id: 'forum', title: 'Forum', desc: "Réalisation d'un forum",
-        img: 'maquette_forum.png', tags: ['HTML/CSS', 'JS'],
-        githubUrl: '', demoUrl: '',
-    },
-    {
-        id: 'profily', title: 'Profily', desc: 'Une IA pour trouver la meilleure entreprise',
-        img: 'maquette_profily.png', tags: ['React', 'Web Audio API', 'TypeScript'],
-        githubUrl: '', demoUrl: '',
-    },
-    {
-        id: 'track-mixer', title: 'TRACK MIXER',
-        desc: 'Application en cours de devellopement, nous en parlerons bientot...',
-        img: 'travail_en_cours.png', tags: ['Python', 'Flask', 'WebSockets'],
-        githubUrl: '', demoUrl: '',
-    },
-];
-
-const seedSkills = [
-    { id: 'golang', name: 'Golang', pct: 70 },
-    { id: 'javascript', name: 'JavaScript', pct: 85 },
-    { id: 'html-css', name: 'HTML / CSS', pct: 70 },
-    { id: 'rust', name: 'Rust', pct: 30 },
-    { id: 'docker', name: 'Docker', pct: 45 },
-    { id: 'sqlite', name: 'SQLite', pct: 40 },
-];
-
 // Carousel
 let cur = 0;
 let slides = [];
@@ -134,21 +104,45 @@ function renderSkills(skills) {
     }
 }
 
-// First paint: render synchronously with seed data, identical to the
-// previous hardcoded markup, with zero dependency on the network.
-renderCarousel(seedProjects);
-renderSkills(seedSkills);
+// The API (backed by the admin panel) is the single source of truth for both
+// lists. Nothing is duplicated here: a hardcoded copy would silently drift
+// away from whatever the panel last saved.
+function showStatus(container, message, isError) {
+    container.innerHTML = `<div class="data-status${isError ? ' is-error' : ''}">${escapeHtml(message)}</div>`;
+}
 
-// Then fetch live data in the background and re-render if it succeeds.
-fetch('/api/projects')
-    .then(res => (res.ok ? res.json() : Promise.reject()))
-    .then(renderCarousel)
-    .catch(() => {});
+function loadSection({ url, container, render, loadingText, errorText }) {
+    showStatus(container, loadingText, false);
+    return fetch(url)
+        .then(res => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
+        .then(data => {
+            if (!Array.isArray(data) || data.length === 0) {
+                showStatus(container, 'Rien à afficher pour le moment.', false);
+                return;
+            }
+            render(data);
+        })
+        .catch(err => {
+            console.error(`Chargement de ${url} impossible :`, err);
+            showStatus(container, errorText, true);
+        });
+}
 
-fetch('/api/skills')
-    .then(res => (res.ok ? res.json() : Promise.reject()))
-    .then(renderSkills)
-    .catch(() => {});
+loadSection({
+    url: '/api/projects',
+    container: inner,
+    render: renderCarousel,
+    loadingText: 'Chargement des projets…',
+    errorText: 'Les projets sont momentanément indisponibles.',
+});
+
+loadSection({
+    url: '/api/skills',
+    container: eqBars,
+    render: renderSkills,
+    loadingText: 'Chargement des compétences…',
+    errorText: 'Les compétences sont momentanément indisponibles.',
+});
 
 // Reveal on scroll
 const reveals = document.querySelectorAll('.reveal');

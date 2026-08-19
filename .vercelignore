@@ -1,0 +1,22 @@
+# Contrôle ce que `vercel --prod` envoie depuis le dossier local.
+# À ne pas confondre avec .gitignore, qui n'a aucun effet sur le déploiement :
+# un fichier ignoré par git est quand même publié s'il n'est pas listé ici.
+
+# Dépendances et métadonnées — Vercel réinstalle à partir de package.json
+node_modules/
+.git/
+.vercel/
+.claude/
+
+# Secrets. Tout fichier déposé à la racine est servi publiquement :
+# hash.txt s'est retrouvé accessible en 200 sur le site de cette façon.
+.env
+.env.*
+hash.txt
+*.pem
+*.key
+secret*
+
+# Outils de développement, inutiles à l'exécution
+scripts/
+README.md
