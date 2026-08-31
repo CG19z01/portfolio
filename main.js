@@ -62,6 +62,24 @@ function slide(dir) {
     inner.style.transform = `translateX(-${cur * 100}%)`;
 }
 
+// GitHub mark, inlined like every other icon on the site (no icon library here).
+const GITHUB_ICON = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.55v-2.1c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.2 1.77 1.2 1.03 1.77 2.7 1.26 3.36.97.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.24 2.76.12 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.26 5.69.41.36.78 1.06.78 2.14v3.17c0 .3.21.67.8.55A11.5 11.5 0 0 0 12 .5z"/></svg>`;
+
+// Demo icon: external link, drawn with the same stroke style as the other icons.
+const DEMO_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15,3 21,3 21,9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+
+// Both URLs come straight from the admin panel (project.githubUrl / demoUrl).
+// A project with an empty field simply gets no button - and a project with
+// neither gets no link row at all, so the card keeps its spacing.
+function renderProjectLinks(p) {
+    const links = [
+        p.githubUrl ? `<a class="slide-link" href="${escapeHtml(p.githubUrl)}" target="_blank" rel="noopener noreferrer">${GITHUB_ICON}<span>GitHub</span></a>` : '',
+        p.demoUrl ? `<a class="slide-link" href="${escapeHtml(p.demoUrl)}" target="_blank" rel="noopener noreferrer">${DEMO_ICON}<span>Démo</span></a>` : '',
+    ].filter(Boolean);
+
+    return links.length ? `<div class="slide-links">${links.join('')}</div>` : '';
+}
+
 function renderCarousel(projects) {
     inner.innerHTML = projects.map(p => `
     <div class="slide">
@@ -72,9 +90,8 @@ function renderCarousel(projects) {
       <div class="slide-desc">${escapeHtml(p.desc)}</div>
       <div class="slide-tags">
         ${(p.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
-        ${p.githubUrl ? `<a class="tag" href="${escapeHtml(p.githubUrl)}" target="_blank" rel="noopener">GitHub</a>` : ''}
-        ${p.demoUrl ? `<a class="tag" href="${escapeHtml(p.demoUrl)}" target="_blank" rel="noopener">Démo</a>` : ''}
       </div>
+      ${renderProjectLinks(p)}
     </div>
   `).join('');
     slides = document.querySelectorAll('.slide');
