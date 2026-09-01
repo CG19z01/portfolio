@@ -279,10 +279,8 @@ nav {
     border-radius: 50%;
     border: 1px solid var(--border);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
     color: var(--muted);
     background: transparent;
     transition: all .2s;
@@ -293,31 +291,23 @@ nav {
     color: var(--purple);
 }
 
-.nav-burger span {
-    display: block;
+/* The optical centre of a triangle sits left of its bounding box, so nudge
+   it right the way the old play button did. */
+.nav-burger svg {
     width: 14px;
-    height: 1.5px;
-    background: currentColor;
-    border-radius: 2px;
-    transition: transform .25s, opacity .2s;
+    height: 14px;
+    margin-left: 2px;
+    transition: transform .25s;
 }
 
-/* Burger folds into a cross while the panel is open. */
+/* Play head tips downwards while the panel is open, pointing at it. */
 .nav-burger[aria-expanded="true"] {
     border-color: var(--purple);
     color: var(--purple);
 }
 
-.nav-burger[aria-expanded="true"] span:nth-child(1) {
-    transform: translateY(4.5px) rotate(45deg);
-}
-
-.nav-burger[aria-expanded="true"] span:nth-child(2) {
-    opacity: 0;
-}
-
-.nav-burger[aria-expanded="true"] span:nth-child(3) {
-    transform: translateY(-4.5px) rotate(-45deg);
+.nav-burger[aria-expanded="true"] svg {
+    transform: rotate(90deg);
 }
 
 .nav-menu-panel {
@@ -369,7 +359,7 @@ nav {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .nav-burger span {
+    .nav-burger svg {
         transition: none;
     }
 }
