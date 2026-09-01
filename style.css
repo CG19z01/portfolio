@@ -259,30 +259,6 @@ nav {
     color: var(--text)
 }
 
-.nav-play {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    transition: all .2s;
-    background: transparent;
-}
-
-.nav-play:hover {
-    border-color: var(--purple);
-    color: var(--purple)
-}
-
-.nav-play svg {
-    width: 14px;
-    height: 14px;
-    margin-left: 2px
-}
-
 /* Sprite holder: kept out of the layout without display:none, which some
    browsers treat as a reason to skip resolving <use> references. */
 .icon-sprite {
@@ -292,17 +268,11 @@ nav {
     overflow: hidden;
 }
 
-.nav-actions {
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-}
-
 .nav-menu {
     position: relative;
 }
 
-/* Same 36px disc as .nav-play, so the two read as a pair. */
+/* Sits where the old play button was, same 36px disc. */
 .nav-burger {
     width: 36px;
     height: 36px;
