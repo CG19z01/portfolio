@@ -857,6 +857,24 @@
 .xp-res-hint { font-size: .6rem; letter-spacing: .1em; color: var(--muted); }
 .xp-res-go { color: var(--purple); font-size: .9rem; }
 
+/* Zone 3: CV + GitHub card, always shown on the right (mirrors the
+   channel list on the left); the panel replaces it while open. */
+.xp-console-links {
+    position: absolute;
+    right: 1.25rem;
+    top: 168px;
+    width: 280px;
+    padding: .9rem .6rem .4rem;
+    border-radius: 10px;
+    background: rgba(19, 19, 24, .82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+}
+.xp-console-links .xp-mix { margin: 0; }
+.xp-has-panel .xp-console-links { display: none; }
+.xp-console-links[hidden] { display: none; }
+
 /* ---------- Zone 4: booking form ---------- */
 .xp-form {
     display: flex;
@@ -952,6 +970,21 @@
         transform: translateY(24px);
     }
     .xp-has-panel .xp-setlist { display: none; }
+    /* CV + GitHub: a compact row above the channel strip */
+    .xp-console-links {
+        top: auto;
+        left: .5rem;
+        right: .5rem;
+        width: auto;
+        bottom: calc(.75rem + 66px + 96px);
+        padding: .5rem;
+    }
+    .xp-console-links .xp-setlist-head { display: none; }
+    .xp-console-links .xp-res { display: flex; gap: .4rem; }
+    .xp-console-links .xp-res li { flex: 1; min-width: 0; }
+    .xp-console-links .xp-mix a { margin: 0; min-height: 44px; padding: .5rem .6rem; gap: .5rem; }
+    .xp-console-links .xp-res-hint,
+    .xp-console-links .xp-res-go { display: none; }
     .xp-panel-img { aspect-ratio: 16 / 8; }
     .xp-panel-title { font-size: 2rem; }
 }

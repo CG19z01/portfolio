@@ -223,14 +223,32 @@ export function createConsoleZone({ scene, root, skills, error }) {
         if (step) handlers.select((active + Number(step.dataset.xpStep) + n) % n);
     });
 
-    // The panel of a channel: direct access to the CV and the GitHub
-    // profile (the user's choice, 2026-11-07). The skills themselves stay on
-    // the mixer and in the channel list, with their levels.
+    // Direct access to the CV and the GitHub profile (the user's choice,
+    // 2026-11-07): always on screen in zone 3 (card on the right, no click
+    // needed), and in the panel a channel opens. The skills themselves stay
+    // on the mixer and in the channel list, with their levels.
+    const RESOURCES = [
+        { href: CV_URL, icon: CV_ICON, name: 'Mon CV', hint: 'PDF · consulter ou télécharger' },
+        { href: GITHUB_URL, icon: GITHUB_ICON, name: 'Mon GitHub', hint: 'github.com/CG19z01' },
+    ];
+    const resourcesHtml = () => `
+            <ul class="xp-mix xp-res">${RESOURCES.map(r => `
+              <li><a href="${esc(r.href)}" target="_blank" rel="noopener noreferrer">
+                <span class="xp-res-icon">${r.icon}</span>
+                <span class="xp-res-text"><span class="xp-mix-name">${esc(r.name)}</span><span class="xp-res-hint">${esc(r.hint)}</span></span>
+                <span class="xp-res-go" aria-hidden="true">↗</span>
+              </a></li>`).join('')}
+            </ul>`;
+
+    const links = document.createElement('div'); // not <section>/<aside>: styled by the classic page
+    links.className = 'xp-console-links';
+    links.setAttribute('role', 'region');
+    links.setAttribute('aria-label', 'Aller plus loin : CV et GitHub');
+    links.hidden = true;
+    links.innerHTML = `<div class="xp-setlist-head"><span class="live-dot"></span> ALLER PLUS LOIN</div>${resourcesHtml()}`;
+    root.appendChild(links);
+
     function panelHtml(i) {
-        const res = [
-            { href: CV_URL, icon: CV_ICON, name: 'Mon CV', hint: 'PDF · consulter ou télécharger' },
-            { href: GITHUB_URL, icon: GITHUB_ICON, name: 'Mon GitHub', hint: 'github.com/CG19z01' },
-        ];
         return `
           <div class="xp-panel-head">
             <span class="xp-panel-track">CANAL ${pad2(i + 1)} / ${pad2(n)}</span>
@@ -239,14 +257,7 @@ export function createConsoleZone({ scene, root, skills, error }) {
             </button>
           </div>
           <div class="xp-panel-scroll">
-            <h2 class="xp-panel-title" id="xpSkillTitle" tabindex="-1">Aller plus loin</h2>
-            <ul class="xp-mix xp-res">${res.map(r => `
-              <li><a href="${esc(r.href)}" target="_blank" rel="noopener noreferrer">
-                <span class="xp-res-icon">${r.icon}</span>
-                <span class="xp-res-text"><span class="xp-mix-name">${esc(r.name)}</span><span class="xp-res-hint">${esc(r.hint)}</span></span>
-                <span class="xp-res-go" aria-hidden="true">↗</span>
-              </a></li>`).join('')}
-            </ul>
+            <h2 class="xp-panel-title" id="xpSkillTitle" tabindex="-1">Aller plus loin</h2>${resourcesHtml()}
           </div>
           <div class="xp-panel-nav">
             <button type="button" class="xp-hud-btn" data-xp-step="-1" ${n < 2 ? 'disabled' : ''}>← CANAL PRÉC.</button>
@@ -266,7 +277,10 @@ export function createConsoleZone({ scene, root, skills, error }) {
         pickables: channels.flatMap(c => [c.hit]),
         on(h) { handlers = { ...handlers, ...h }; },
         setHover(i) { hovered = i; },
-        showList(show) { list.hidden = !show; },
+        showList(show) {
+            list.hidden = !show;
+            links.hidden = !show;
+        },
         // Faders slide from zero to their saved level (instant if reduced motion).
         arrive(instant) {
             if (instant) {
@@ -328,6 +342,7 @@ export function createConsoleZone({ scene, root, skills, error }) {
             [caseGeo, faceGeo, capGeo, hitGeo].forEach(g => g.dispose());
             scene.remove(group);
             list.remove();
+            links.remove();
             panel.remove();
         },
     };
