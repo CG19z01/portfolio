@@ -17,6 +17,24 @@ const enterLabel = enterBtn.querySelector('.xp-enter-label');
 const classicBtn = document.getElementById('xpClassic');
 const note = document.getElementById('xpLandingNote');
 
+// Download the 3D code as soon as the visitor shows intent (pointer over
+// "Entrer", finger down, key pressed on it) instead of on the click: by the
+// time the click lands, most of it is already there. Not on focus: the
+// landing focuses "Entrer" itself, so every visitor would pay for it.
+// Visitors who stay on the classic page never trigger it. A failed load is
+// forgotten so the click can try again.
+let warm = null;
+function warmUp() {
+    warm ??= import('./main.js').catch(err => {
+        warm = null;
+        throw err;
+    });
+    return warm;
+}
+['pointerenter', 'touchstart', 'keydown'].forEach(type => {
+    enterBtn.addEventListener(type, () => { warmUp().catch(() => {}); }, { once: true, passive: true });
+});
+
 function hasWebGL() {
     try {
         const canvas = document.createElement('canvas');
@@ -103,7 +121,7 @@ async function enter() {
     const returnFocus = document.getElementById('navBurger');
 
     try {
-        const { startExperience } = await import('./main.js');
+        const { startExperience } = await warmUp();
         closeLanding();
         await startExperience({
             onExit() {

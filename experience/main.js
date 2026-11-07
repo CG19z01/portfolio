@@ -11,6 +11,7 @@ import { createDJ } from './dj.js';
 import { ZONES, START_VIEW, totemView, djPanelView, consoleView, bookingView } from './layout.js';
 import { createBackstage } from './backstage.js';
 import { createTutorial } from './tutorial.js';
+import { createQuality } from './quality.js';
 import { createConsoleZone } from './console.js';
 import { createProfilePanel } from './profile.js';
 
@@ -128,7 +129,6 @@ export async function startExperience({ onExit } = {}) {
         const coarse = window.matchMedia('(pointer: coarse)').matches;
         const renderer = new THREE.WebGLRenderer({ antialias: window.devicePixelRatio < 2, powerPreference: 'high-performance' });
         state.renderer = renderer;
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, coarse ? 1.5 : 2));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -156,16 +156,22 @@ export async function startExperience({ onExit } = {}) {
             quit();
         });
 
-        // Canvas text uses the page fonts. They are only fetched once something
-        // uses them, so ask for the exact faces the canvases draw with.
-        await Promise.all([
-            "700 96px 'Bebas Neue'", "400 24px 'IBM Plex Mono'",
-        ].map(f => document.fonts?.load(f).catch(() => null)));
-        const [{ items: projects, error }, { items: skills, error: skillsError }] = await Promise.all([
-            fetchList('/api/projects', 'Projets'), fetchList('/api/skills', 'Compétences'),
+        // Data and fonts load side by side. Canvas text uses the page fonts,
+        // which are only fetched once something uses them, so ask for the
+        // exact faces the canvases draw with.
+        const [[{ items: projects, error }, { items: skills, error: skillsError }]] = await Promise.all([
+            Promise.all([fetchList('/api/projects', 'Projets'), fetchList('/api/skills', 'Compétences')]),
+            ...["700 96px 'Bebas Neue'", "400 24px 'IBM Plex Mono'"].map(f => document.fonts?.load(f).catch(() => null)),
         ]);
         if (state.closed) return null; // the visitor left while it was loading
         state.world = buildWorld(scene);
+        const quality = createQuality(renderer, {
+            coarse,
+            onLevel(level) {
+                state.world.setLowLights(level === 0);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            },
+        });
         const zone1 = createProjectsZone({ scene, root, projects, error });
         state.zone = zone1;
         state.led = createLedWall(state.world.ledMaterial, projects, { reducedMotion });
@@ -430,7 +436,9 @@ export async function startExperience({ onExit } = {}) {
         const timer = new THREE.Timer();
         renderer.setAnimationLoop(() => {
             timer.update();
-            const dt = Math.min(timer.getDelta(), 0.1);
+            const rawDt = timer.getDelta();
+            const dt = Math.min(rawDt, 0.1);
+            quality.sample(rawDt, !state.guide.travelling);
             const t = reducedMotion.matches ? 0 : timer.getElapsed();
             state.guide.update(dt);
             state.world.update(t);
@@ -444,7 +452,7 @@ export async function startExperience({ onExit } = {}) {
 
         // Test hook for automated screenshots only (?xpdebug in the URL).
         if (new URLSearchParams(location.search).has('xpdebug')) {
-            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, openBooking, closeBooking, tutorial, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
+            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, openBooking, closeBooking, tutorial, info: () => ({ ...renderer.info.render, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, programs: renderer.info.programs.length, lights: (() => { let n = 0; scene.traverse(o => { if (o.isLight) n++; }); return n; })(), pixelRatio: renderer.getPixelRatio(), quality: quality.level }), view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
         }
 
         requestAnimationFrame(() => root.querySelector('.xp-loader').classList.add('is-done'));

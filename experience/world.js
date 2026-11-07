@@ -249,11 +249,12 @@ export function buildWorld(scene) {
     // ---------- Lighting ----------
     world.add(new THREE.HemisphereLight(PALETTE.lavender, PALETTE.glow, 1.6));
     world.add(new THREE.AmbientLight(PALETTE.text, 0.25));
-    [[-5, PALETTE.purple], [0, PALETTE.lavender], [5, PALETTE.purple]].forEach(([x, color]) => {
+    const spots = [[-5, PALETTE.purple], [0, PALETTE.lavender], [5, PALETTE.purple]].map(([x, color]) => {
         const s = new THREE.SpotLight(color, 60, 18, 0.45, 0.6, 1.5);
         s.position.set(x, 7.2, -2.6);
         s.target.position.set(x * 0.4, STAGE.height, -6.5);
         world.add(s, s.target);
+        return s;
     });
     const floorWash = new THREE.PointLight(PALETTE.purple, 45, 26, 1.4);
     floorWash.position.set(0, 5, 4);
@@ -278,6 +279,12 @@ export function buildWorld(scene) {
     return {
         ledMaterial: ledMat, // the LED wall content is driven by ledwall.js
         update(time) { animated.forEach(fn => fn(time)); },
+        // Low quality: the spotlights go (one-time shader rebuild), while the
+        // floor wash brightens a little to keep the stage readable.
+        setLowLights(low) {
+            spots.forEach(s => { s.visible = !low; });
+            floorWash.intensity = low ? 70 : 45;
+        },
         dispose() {
             world.traverse(o => {
                 if (o.geometry) o.geometry.dispose();
