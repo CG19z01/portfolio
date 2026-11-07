@@ -8,21 +8,22 @@ import { createGuide } from './guide.js';
 import { createProjectsZone } from './projects.js';
 import { createLedWall } from './ledwall.js';
 import { createDJ } from './dj.js';
-import { ZONES, START_VIEW, totemView, djPanelView } from './layout.js';
+import { ZONES, START_VIEW, totemView, djPanelView, consoleView } from './layout.js';
+import { createConsoleZone } from './console.js';
 import { createProfilePanel } from './profile.js';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-async function fetchProjects() {
-    // Same endpoint as the classic page: the admin panel stays the only source.
+// Same endpoints as the classic page: the admin panel stays the only source.
+async function fetchList(url, label) {
     try {
-        const res = await fetch('/api/projects');
+        const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        return { projects: Array.isArray(data) ? data : [], error: false };
+        return { items: Array.isArray(data) ? data : [], error: false };
     } catch (err) {
-        console.error('Projets indisponibles pour la salle 3D :', err);
-        return { projects: [], error: true };
+        console.error(`${label} indisponibles pour la salle 3D :`, err);
+        return { items: [], error: true };
     }
 }
 
@@ -58,7 +59,7 @@ const ZONE_NOTES = {
     start: 'Choisissez une zone en bas de l\'écran, ou cliquez sur un écran devant la scène.',
     projects: 'Cliquez sur un écran ou un titre de la setlist pour ouvrir un projet.',
     dj: 'Cliquez sur le DJ pour ouvrir sa présentation.',
-    console: 'Zone en préparation : les compétences arrivent bientôt.',
+    console: 'Une compétence par canal, au niveau réglé dans le portfolio. Cliquez sur un canal.',
     backstage: 'Zone en préparation : les contacts arrivent bientôt.',
 };
 
@@ -72,7 +73,7 @@ export async function startExperience({ onExit } = {}) {
     // Everything created so far, so teardown works at any point — including
     // halfway through a failed start, or a click on "Version classique"
     // while the scene is still loading.
-    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, profile: null, cleanups: [], closed: false };
+    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, profile: null, mixer: null, cleanups: [], closed: false };
     let root = null;
     let restoreInert = () => {};
 
@@ -86,6 +87,7 @@ export async function startExperience({ onExit } = {}) {
         state.led?.dispose();
         state.dj?.dispose();
         state.profile?.dispose();
+        state.mixer?.dispose();
         state.world?.dispose();
         if (state.renderer) {
             state.renderer.dispose();
@@ -155,18 +157,22 @@ export async function startExperience({ onExit } = {}) {
         await Promise.all([
             "700 96px 'Bebas Neue'", "400 24px 'IBM Plex Mono'",
         ].map(f => document.fonts?.load(f).catch(() => null)));
-        const { projects, error } = await fetchProjects();
+        const [{ items: projects, error }, { items: skills, error: skillsError }] = await Promise.all([
+            fetchList('/api/projects', 'Projets'), fetchList('/api/skills', 'Compétences'),
+        ]);
         if (state.closed) return null; // the visitor left while it was loading
         state.world = buildWorld(scene);
         const zone1 = createProjectsZone({ scene, root, projects, error });
         state.zone = zone1;
         state.led = createLedWall(state.world.ledMaterial, projects, { reducedMotion });
         state.dj = createDJ(scene);
+        const mixer = createConsoleZone({ scene, root, skills, error: skillsError });
+        state.mixer = mixer;
 
         // ---------- Picking (hover + click on totems and on the DJ) ----------
         const raycaster = new THREE.Raycaster();
         const ndc = new THREE.Vector2();
-        const pickables = [...zone1.pickables, ...state.dj.pickables];
+        const pickables = [...zone1.pickables, ...state.dj.pickables, ...mixer.pickables];
         const djMeshes = new Set(state.dj.pickables);
         function pick(x, y) {
             const r = canvas.getBoundingClientRect();
@@ -174,7 +180,9 @@ export async function startExperience({ onExit } = {}) {
             raycaster.setFromCamera(ndc, camera);
             const hit = raycaster.intersectObjects(pickables, false)[0];
             if (!hit) return null;
-            return djMeshes.has(hit.object) ? { dj: true } : { totem: hit.object.userData.totem };
+            if (djMeshes.has(hit.object)) return { dj: true };
+            if (hit.object.userData.channel !== undefined) return { channel: hit.object.userData.channel };
+            return { totem: hit.object.userData.totem };
         }
 
         // ---------- Navigation ----------
@@ -198,6 +206,8 @@ export async function startExperience({ onExit } = {}) {
                 : '<span class="xp-zone-name">BIENVENUE</span><span class="xp-zone-where">Dans la salle</span>';
             hint.textContent = ZONE_NOTES[id];
             zone1.showSetlist(id === 'projects');
+            mixer.showList(id === 'console');
+            if (id === 'console') mixer.arrive(reducedMotion.matches);
         }
 
         function restoreFocus() {
@@ -222,9 +232,18 @@ export async function startExperience({ onExit } = {}) {
             if (!stay) goZone('dj', { present: false });
         }
 
+        function closeSkill({ stay = false } = {}) {
+            if (!mixer.isOpen) return;
+            mixer.close();
+            root.classList.remove('xp-has-panel');
+            restoreFocus();
+            if (!stay) goZone('console');
+        }
+
         function closePanels() {
             closeProject({ stay: true });
             closeProfile({ stay: true });
+            closeSkill({ stay: true });
         }
 
         // Arriving at the DJ opens his presentation (the zone's content);
@@ -244,6 +263,7 @@ export async function startExperience({ onExit } = {}) {
         function openProject(i, from) {
             if (i < 0 || i >= zone1.count) return;
             closeProfile({ stay: true });
+            closeSkill({ stay: true });
             if (!zone1.isOpen) returnFocus = from || document.activeElement;
             setZone('projects');
             zone1.open(i);
@@ -254,12 +274,29 @@ export async function startExperience({ onExit } = {}) {
 
         function openProfile(from) {
             closeProject({ stay: true });
+            closeSkill({ stay: true });
             if (!profile.isOpen) returnFocus = from || document.activeElement;
             setZone('dj');
             profile.open();
             root.classList.add('xp-has-panel');
             state.guide.goTo(djPanelView(panelSide()));
         }
+
+        function openSkill(i, from) {
+            if (i < 0 || i >= mixer.count) return;
+            closeProject({ stay: true });
+            closeProfile({ stay: true });
+            if (!mixer.isOpen) returnFocus = from || document.activeElement;
+            setZone('console');
+            mixer.open(i);
+            root.classList.add('xp-has-panel');
+            state.guide.goTo(consoleView(mixer.place(i), panelSide()));
+        }
+
+        mixer.on({
+            select: (i, from) => openSkill(i, from),
+            close: () => closeSkill(),
+        });
 
         zone1.on({
             select: (i, from) => openProject(i, from),
@@ -278,11 +315,13 @@ export async function startExperience({ onExit } = {}) {
             onTap(x, y) {
                 const hit = pick(x, y);
                 if (hit?.dj) openProfile(canvas);
+                else if (hit?.channel !== undefined) openSkill(hit.channel, canvas);
                 else if (hit) openProject(hit.totem, canvas);
             },
             onHover(x, y) {
                 const hit = x === null ? null : pick(x, y);
-                zone1.setHover(hit && !hit.dj ? hit.totem : -1);
+                zone1.setHover(hit?.totem ?? -1);
+                mixer.setHover(hit?.channel ?? -1);
                 state.dj.setHover(!!hit?.dj);
                 canvas.classList.toggle('is-pointing', !!hit);
                 document.body.classList.toggle('cursor-hover', !!hit);
@@ -295,9 +334,10 @@ export async function startExperience({ onExit } = {}) {
             if (e.altKey || e.ctrlKey || e.metaKey) return;
             const inField = e.target.closest('input, textarea, select');
             if (e.key === 'Escape') {
-                if (zone1.isOpen || profile.isOpen) {
+                if (zone1.isOpen || profile.isOpen || mixer.isOpen) {
                     e.preventDefault();
                     if (zone1.isOpen) closeProject();
+                    else if (mixer.isOpen) closeSkill();
                     else closeProfile();
                 }
                 return;
@@ -307,6 +347,12 @@ export async function startExperience({ onExit } = {}) {
                 e.preventDefault();
                 const n = zone1.count;
                 openProject((zone1.active + (e.key === 'ArrowRight' ? 1 : -1) + n) % n);
+                return;
+            }
+            if (mixer.isOpen && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+                e.preventDefault();
+                const n = mixer.count;
+                openSkill((mixer.active + (e.key === 'ArrowRight' ? 1 : -1) + n) % n);
                 return;
             }
             if (e.key === '0') goZone('start');
@@ -320,6 +366,7 @@ export async function startExperience({ onExit } = {}) {
             // Re-frame an open project for the new panel placement.
             if (zone1.isOpen) state.guide.goTo(totemView(zone1.place(zone1.active), panelSide()));
             if (profile.isOpen) state.guide.goTo(djPanelView(panelSide()));
+            if (mixer.isOpen) state.guide.goTo(consoleView(mixer.place(mixer.active), panelSide()));
         });
 
         // Arrival: from high above the crowd down to the entrance.
@@ -337,12 +384,13 @@ export async function startExperience({ onExit } = {}) {
             zone1.update(t, dt);
             state.led.update(dt);
             state.dj.update(t, dt);
+            mixer.update(t, dt);
             renderer.render(scene, camera);
         });
 
         // Test hook for automated screenshots only (?xpdebug in the URL).
         if (new URLSearchParams(location.search).has('xpdebug')) {
-            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
+            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
         }
 
         requestAnimationFrame(() => root.querySelector('.xp-loader').classList.add('is-done'));

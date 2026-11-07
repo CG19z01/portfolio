@@ -548,6 +548,14 @@
     white-space: nowrap;
 }
 
+/* ---------- Zone 3: channel list ---------- */
+.xp-channel-db {
+    margin-left: auto;
+    flex: none;
+    font-size: .62rem;
+    color: var(--lavender, #b06aff);
+}
+
 /* ---------- Zone 1: project panel ---------- */
 .xp-panel {
     position: absolute;
@@ -817,6 +825,73 @@
 .xp-has-panel .xp-hud-hint {
     display: none;
 }
+
+/* ---------- Zone 3: skill panel ---------- */
+.xp-level {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: .2rem 0 .4rem;
+}
+.xp-level-db {
+    flex: none;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    line-height: 1;
+    color: var(--text);
+}
+.xp-level-db small {
+    font-size: 1.1rem;
+    color: var(--purple);
+}
+.xp-level-track,
+.xp-mix-track {
+    position: relative;
+    flex: 1;
+    height: 10px;
+    border-radius: 5px;
+    background: var(--bg3, #1a1a22);
+    overflow: hidden;
+}
+.xp-level-fill,
+.xp-mix-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--purple-dark, #6F0EAD), var(--purple, #A30DAD), #ee0055);
+}
+.xp-mix-track { height: 6px; }
+.xp-mix {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.xp-mix button {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    width: 100%;
+    min-height: 36px;
+    padding: .35rem .5rem;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .68rem;
+    text-align: left;
+    transition: background .2s, color .2s;
+}
+.xp-mix button:hover,
+.xp-mix button:focus-visible { background: rgba(163, 13, 173, .14); color: var(--text); }
+.xp-mix button[aria-current] { background: rgba(163, 13, 173, .28); color: var(--text); }
+.xp-mix-name {
+    flex: 0 0 7.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.xp-mix-db { flex: 0 0 3.2rem; text-align: right; }
 
 @media (max-width: 759px) {
     .xp-hud-top {

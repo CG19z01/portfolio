@@ -180,7 +180,7 @@ export function buildWorld(scene) {
         deck.position.set(BOOTH.x + dx, deckTop + 0.04, BOOTH.z);
         world.add(deck);
     });
-    world.add(box(1.4, 0.06, 0.7, mat.case, BOOTH.x, deckTop, BOOTH.z));
+    // The mixer between the decks is Zone 3, built by console.js.
 
     // Truss + moving heads
     const trussY = 7.6;

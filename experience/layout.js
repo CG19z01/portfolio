@@ -119,6 +119,15 @@ export function totemView({ x, y, z, rotY }, side) {
 
 // Framing of the DJ while his presentation panel is open: he sits in the
 // free part of the screen, left of the side panel or above the bottom sheet.
+// Framing of the mixer with a channel selected: the selected channel is
+// drawn in the free part of the screen (left of the side panel, above the
+// bottom sheet), seen from the audience side looking down on the faders.
+export function consoleView({ x }, side) {
+    return side === 'bottom'
+        ? { pos: [x * 0.4, 3.2, -4.0], target: [x * 0.4, -0.8, -6.5] }
+        : { pos: [x * 0.5 + 0.35, 3.4, -3.2], target: [x * 0.5 + 0.6, 1.6, -6.3] };
+}
+
 export function djPanelView(side) {
     return side === 'bottom'
         ? { pos: [0, 3.3, -0.4], target: [0, -0.4, -7.0] }
