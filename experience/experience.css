@@ -682,6 +682,137 @@
     opacity: .4;
 }
 
+/* ---------- Zone 2: DJ presentation (tabs) ---------- */
+.xp-profile-id {
+    padding: 1.1rem 1.25rem .4rem;
+}
+.xp-profile-id .xp-panel-title {
+    margin: 0;
+}
+.xp-profile-role {
+    font-size: .62rem;
+    letter-spacing: .2em;
+    color: var(--purple);
+    text-transform: uppercase;
+}
+/* Tabs styled as deck selectors A / B / C */
+.xp-tabs {
+    display: flex;
+    gap: .4rem;
+    padding: .8rem 1.25rem .9rem;
+    border-bottom: 1px solid var(--border);
+}
+.xp-tabs [role="tab"] {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    min-height: 40px;
+    padding: 0 .6rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    transition: color .2s, border-color .2s, background .2s, box-shadow .2s;
+}
+.xp-tabs [role="tab"]:hover,
+.xp-tabs [role="tab"]:focus-visible {
+    color: var(--text);
+    border-color: var(--purple);
+}
+.xp-tabs [role="tab"][aria-selected="true"] {
+    color: var(--text);
+    background: rgba(163, 13, 173, .22);
+    border-color: var(--purple);
+    box-shadow: 0 0 14px rgba(163, 13, 173, .35);
+}
+.xp-tab-deck {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0;
+    color: var(--purple);
+}
+.xp-profile .xp-panel-scroll:focus-visible {
+    outline: 1px solid var(--purple);
+    outline-offset: -1px;
+}
+.xp-about-head {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    line-height: 1;
+    letter-spacing: .04em;
+    margin: 0 0 .8rem;
+}
+.xp-about-head span {
+    color: var(--purple);
+}
+.xp-sub {
+    margin: 1.4rem 0 .7rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: .6rem;
+    letter-spacing: .22em;
+    color: var(--purple);
+    text-transform: uppercase;
+}
+.xp-sub:first-child {
+    margin-top: 0;
+}
+.xp-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 1rem;
+    border-left: 1px solid var(--border);
+}
+.xp-timeline li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    padding: 0 0 1rem;
+}
+.xp-timeline li::before {
+    content: '';
+    position: absolute;
+    left: calc(-1rem - 4px);
+    top: .3rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--purple);
+    box-shadow: 0 0 8px var(--purple);
+}
+.xp-tl-when {
+    font-size: .58rem;
+    letter-spacing: .14em;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+.xp-tl-title {
+    font-size: .78rem;
+    color: var(--text);
+}
+.xp-tl-where {
+    color: var(--muted);
+}
+.xp-tl-detail {
+    font-size: .68rem;
+    line-height: 1.6;
+    color: var(--text);
+    opacity: .7;
+}
+.xp-contact {
+    width: 100%;
+    justify-content: center;
+    padding: .85rem 1rem;
+    font-size: .65rem;
+}
+
 /* While a project is open, the hint would sit under the panel: drop it. */
 .xp-has-panel .xp-hud-hint {
     display: none;

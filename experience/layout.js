@@ -116,3 +116,11 @@ export function totemView({ x, y, z, rotY }, side) {
         target: [x + rx * shiftR, ty, z + rz * shiftR],
     };
 }
+
+// Framing of the DJ while his presentation panel is open: he sits in the
+// free part of the screen, left of the side panel or above the bottom sheet.
+export function djPanelView(side) {
+    return side === 'bottom'
+        ? { pos: [0, 3.3, -0.4], target: [0, -0.4, -7.0] }
+        : { pos: [-0.5, 2.85, -1.7], target: [1.7, 2.1, -7.0] };
+}

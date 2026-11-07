@@ -216,8 +216,19 @@ export function createDJ(scene) {
 
     scene.add(root);
 
+    const pickables = [];
+    root.traverse(o => { if (o.isMesh) pickables.push(o); });
+    let hover = 0, hoverGoal = 0;
+
     return {
-        update,
+        pickables,
+        // Hover feedback: the headphone rings light up.
+        setHover(on) { hoverGoal = on ? 1 : 0; },
+        update(t, dt = 0.016) {
+            hover += (hoverGoal - hover) * Math.min(1, dt * 8);
+            mats.accent.emissiveIntensity = 1.4 + 3 * hover;
+            update(t);
+        },
         dispose() {
             geos.forEach(geo => geo.dispose());
             Object.values(mats).forEach(m => m.dispose());

@@ -8,7 +8,8 @@ import { createGuide } from './guide.js';
 import { createProjectsZone } from './projects.js';
 import { createLedWall } from './ledwall.js';
 import { createDJ } from './dj.js';
-import { ZONES, START_VIEW, totemView } from './layout.js';
+import { ZONES, START_VIEW, totemView, djPanelView } from './layout.js';
+import { createProfilePanel } from './profile.js';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -56,7 +57,7 @@ function buildShell(onQuit) {
 const ZONE_NOTES = {
     start: 'Choisissez une zone en bas de l\'écran, ou cliquez sur un écran devant la scène.',
     projects: 'Cliquez sur un écran ou un titre de la setlist pour ouvrir un projet.',
-    dj: 'Zone en préparation : la présentation arrive bientôt.',
+    dj: 'Cliquez sur le DJ pour ouvrir sa présentation.',
     console: 'Zone en préparation : les compétences arrivent bientôt.',
     backstage: 'Zone en préparation : les contacts arrivent bientôt.',
 };
@@ -71,7 +72,7 @@ export async function startExperience({ onExit } = {}) {
     // Everything created so far, so teardown works at any point — including
     // halfway through a failed start, or a click on "Version classique"
     // while the scene is still loading.
-    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, cleanups: [], closed: false };
+    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, profile: null, cleanups: [], closed: false };
     let root = null;
     let restoreInert = () => {};
 
@@ -84,6 +85,7 @@ export async function startExperience({ onExit } = {}) {
         state.zone?.dispose();
         state.led?.dispose();
         state.dj?.dispose();
+        state.profile?.dispose();
         state.world?.dispose();
         if (state.renderer) {
             state.renderer.dispose();
@@ -161,15 +163,18 @@ export async function startExperience({ onExit } = {}) {
         state.led = createLedWall(state.world.ledMaterial, projects, { reducedMotion });
         state.dj = createDJ(scene);
 
-        // ---------- Picking (hover + click on totems) ----------
+        // ---------- Picking (hover + click on totems and on the DJ) ----------
         const raycaster = new THREE.Raycaster();
         const ndc = new THREE.Vector2();
+        const pickables = [...zone1.pickables, ...state.dj.pickables];
+        const djMeshes = new Set(state.dj.pickables);
         function pick(x, y) {
             const r = canvas.getBoundingClientRect();
             ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
             raycaster.setFromCamera(ndc, camera);
-            const hit = raycaster.intersectObjects(zone1.pickables, false)[0];
-            return hit ? hit.object.userData.totem : -1;
+            const hit = raycaster.intersectObjects(pickables, false)[0];
+            if (!hit) return null;
+            return djMeshes.has(hit.object) ? { dj: true } : { totem: hit.object.userData.totem };
         }
 
         // ---------- Navigation ----------
@@ -195,18 +200,41 @@ export async function startExperience({ onExit } = {}) {
             zone1.showSetlist(id === 'projects');
         }
 
+        function restoreFocus() {
+            (returnFocus?.isConnected ? returnFocus : root).focus({ preventScroll: true });
+            returnFocus = null;
+        }
+
         function closeProject({ stay = false } = {}) {
             if (!zone1.isOpen) return;
             zone1.close();
             root.classList.remove('xp-has-panel');
             state.led.resume();
-            (returnFocus?.isConnected ? returnFocus : root).focus({ preventScroll: true });
-            returnFocus = null;
+            restoreFocus();
             if (!stay) goZone('projects');
         }
 
-        function goZone(id) {
-            if (zone1.isOpen) closeProject({ stay: true });
+        function closeProfile({ stay = false } = {}) {
+            if (!profile.isOpen) return;
+            profile.close();
+            root.classList.remove('xp-has-panel');
+            restoreFocus();
+            if (!stay) goZone('dj', { present: false });
+        }
+
+        function closePanels() {
+            closeProject({ stay: true });
+            closeProfile({ stay: true });
+        }
+
+        // Arriving at the DJ opens his presentation (the zone's content);
+        // `present: false` is the plain view, used after closing it.
+        function goZone(id, { present = true } = {}) {
+            if (id === 'dj' && present) {
+                openProfile();
+                return;
+            }
+            closePanels();
             setZone(id);
             const zone = id === 'start' ? START_VIEW : ZONES.find(z => z.id === id);
             const portrait = window.innerWidth < window.innerHeight;
@@ -215,6 +243,7 @@ export async function startExperience({ onExit } = {}) {
 
         function openProject(i, from) {
             if (i < 0 || i >= zone1.count) return;
+            closeProfile({ stay: true });
             if (!zone1.isOpen) returnFocus = from || document.activeElement;
             setZone('projects');
             zone1.open(i);
@@ -223,22 +252,40 @@ export async function startExperience({ onExit } = {}) {
             state.guide.goTo(totemView(zone1.place(i), panelSide()));
         }
 
+        function openProfile(from) {
+            closeProject({ stay: true });
+            if (!profile.isOpen) returnFocus = from || document.activeElement;
+            setZone('dj');
+            profile.open();
+            root.classList.add('xp-has-panel');
+            state.guide.goTo(djPanelView(panelSide()));
+        }
+
         zone1.on({
             select: (i, from) => openProject(i, from),
             close: () => closeProject(),
         });
 
+        const profile = createProfilePanel({
+            root,
+            onClose: () => closeProfile(),
+            onContact: () => goZone('backstage'),
+        });
+        state.profile = profile;
+
         state.guide = createGuide(camera, canvas, {
             reducedMotion,
             onTap(x, y) {
-                const i = pick(x, y);
-                if (i >= 0) openProject(i, canvas);
+                const hit = pick(x, y);
+                if (hit?.dj) openProfile(canvas);
+                else if (hit) openProject(hit.totem, canvas);
             },
             onHover(x, y) {
-                const i = x === null ? -1 : pick(x, y);
-                zone1.setHover(i);
-                canvas.classList.toggle('is-pointing', i >= 0);
-                document.body.classList.toggle('cursor-hover', i >= 0);
+                const hit = x === null ? null : pick(x, y);
+                zone1.setHover(hit && !hit.dj ? hit.totem : -1);
+                state.dj.setHover(!!hit?.dj);
+                canvas.classList.toggle('is-pointing', !!hit);
+                document.body.classList.toggle('cursor-hover', !!hit);
             },
         });
 
@@ -248,9 +295,10 @@ export async function startExperience({ onExit } = {}) {
             if (e.altKey || e.ctrlKey || e.metaKey) return;
             const inField = e.target.closest('input, textarea, select');
             if (e.key === 'Escape') {
-                if (zone1.isOpen) {
+                if (zone1.isOpen || profile.isOpen) {
                     e.preventDefault();
-                    closeProject();
+                    if (zone1.isOpen) closeProject();
+                    else closeProfile();
                 }
                 return;
             }
@@ -271,6 +319,7 @@ export async function startExperience({ onExit } = {}) {
             renderer.setSize(window.innerWidth, window.innerHeight);
             // Re-frame an open project for the new panel placement.
             if (zone1.isOpen) state.guide.goTo(totemView(zone1.place(zone1.active), panelSide()));
+            if (profile.isOpen) state.guide.goTo(djPanelView(panelSide()));
         });
 
         // Arrival: from high above the crowd down to the entrance.
@@ -287,13 +336,13 @@ export async function startExperience({ onExit } = {}) {
             state.world.update(t);
             zone1.update(t, dt);
             state.led.update(dt);
-            state.dj.update(t);
+            state.dj.update(t, dt);
             renderer.render(scene, camera);
         });
 
         // Test hook for automated screenshots only (?xpdebug in the URL).
         if (new URLSearchParams(location.search).has('xpdebug')) {
-            window.__xp = { goZone, openProject, closeProject, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
+            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
         }
 
         requestAnimationFrame(() => root.querySelector('.xp-loader').classList.add('is-done'));
