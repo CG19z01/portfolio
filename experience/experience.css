@@ -1,0 +1,383 @@
+/* ==========================================================================
+   Immersive experience — landing overlay + 3D shell.
+   Every colour comes from the :root tokens in style.css.
+   ========================================================================== */
+
+/* ---------- Landing ---------- */
+
+.xp-landing {
+    display: none;
+}
+
+.xp-landing-on body,
+.xp-on body {
+    overflow: hidden;
+}
+
+.xp-landing-on .xp-landing {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse 70% 55% at 50% 100%, rgba(163, 13, 173, .35) 0%, transparent 70%),
+        radial-gradient(circle at 50% 85%, var(--bg-glow) 0%, transparent 75%),
+        var(--bg);
+}
+
+.xp-landing-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.xp-landing-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: .15em;
+    color: var(--purple);
+    margin-bottom: 2.5rem;
+    animation: fadeUp .8s ease both;
+}
+
+.xp-landing-logo span {
+    color: var(--text);
+}
+
+.xp-landing-badge {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .65rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    animation: fadeUp .8s .1s ease both;
+}
+
+.xp-landing-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 12vw, 9rem);
+    line-height: .9;
+    letter-spacing: .05em;
+    text-shadow: 0 0 60px rgba(163, 13, 173, .45);
+    animation: fadeUp .8s .2s ease both;
+}
+
+.xp-landing-title .amp {
+    color: var(--purple);
+}
+
+.xp-landing-sub {
+    margin: 1.5rem 0 2.5rem;
+    max-width: 520px;
+    font-size: .8rem;
+    line-height: 1.9;
+    color: var(--muted);
+    animation: fadeUp .8s .3s ease both;
+}
+
+.xp-landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    animation: fadeUp .8s .4s ease both;
+}
+
+.xp-enter {
+    padding: 1.1rem 2.2rem;
+    font-size: .75rem;
+    box-shadow: 0 0 0 0 rgba(163, 13, 173, .6);
+    animation: xpEnterPulse 2.4s ease-out infinite;
+}
+
+.xp-enter svg {
+    width: 12px;
+    height: 12px;
+}
+
+.xp-enter:disabled {
+    opacity: .5;
+    animation: none;
+    transform: none;
+}
+
+@keyframes xpEnterPulse {
+    0% { box-shadow: 0 0 0 0 rgba(163, 13, 173, .55); }
+    70%, 100% { box-shadow: 0 0 0 18px rgba(163, 13, 173, 0); }
+}
+
+.xp-classic {
+    padding: 1.05rem 1.8rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .15em;
+    transition: all .25s;
+}
+
+.xp-classic:hover,
+.xp-classic:focus-visible {
+    border-color: var(--purple);
+    color: var(--text);
+}
+
+.xp-landing-note {
+    margin-top: 1.75rem;
+    font-size: .62rem;
+    letter-spacing: .18em;
+    color: var(--muted);
+    animation: fadeUp .8s .5s ease both;
+}
+
+.xp-landing-note.is-error {
+    color: var(--text);
+    max-width: 420px;
+    line-height: 1.8;
+    letter-spacing: .08em;
+}
+
+/* Stage light beams sweeping down from the top edge */
+.xp-landing-beams {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.xp-landing-beams span {
+    position: absolute;
+    top: -10%;
+    width: 22vw;
+    min-width: 160px;
+    height: 120%;
+    background: linear-gradient(180deg, rgba(176, 106, 255, .22) 0%, rgba(163, 13, 173, .06) 55%, transparent 85%);
+    clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+    transform-origin: 50% 0;
+    filter: blur(2px);
+    animation: xpBeam 9s ease-in-out infinite alternate;
+}
+
+.xp-landing-beams span:nth-child(1) { left: 2%;  animation-delay: -1s; }
+.xp-landing-beams span:nth-child(2) { left: 20%; animation-delay: -4s; opacity: .7; }
+.xp-landing-beams span:nth-child(3) { left: 39%; animation-delay: -2s; }
+.xp-landing-beams span:nth-child(4) { left: 58%; animation-delay: -6s; opacity: .7; }
+.xp-landing-beams span:nth-child(5) { left: 76%; animation-delay: -3s; }
+
+@keyframes xpBeam {
+    from { transform: rotate(-14deg); }
+    to   { transform: rotate(14deg); }
+}
+
+/* Crowd-level equalizer along the bottom edge (bars built by landing.js) */
+.xp-landing-eq {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 90px;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 3px;
+    pointer-events: none;
+    opacity: .5;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+
+.xp-landing-eq i {
+    flex: 1;
+    height: 100%;
+    background: linear-gradient(0deg, var(--purple-dark), var(--purple));
+    transform-origin: 50% 100%;
+    animation: xpEq 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes xpEq {
+    from { transform: scaleY(.08); }
+    to   { transform: scaleY(var(--h, .6)); }
+}
+
+@media (max-width: 560px) {
+    .xp-landing-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .xp-enter,
+    .xp-classic {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .xp-landing-beams span,
+    .xp-landing-eq i,
+    .xp-enter {
+        animation: none;
+    }
+
+    .xp-landing-eq i {
+        transform: scaleY(calc(var(--h, .6) * .6));
+    }
+
+    .xp-landing-logo,
+    .xp-landing-badge,
+    .xp-landing-title,
+    .xp-landing-sub,
+    .xp-landing-actions,
+    .xp-landing-note {
+        animation: none;
+    }
+}
+
+/* ---------- 3D shell ---------- */
+
+.xp-root {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    background: var(--bg);
+    outline: none;
+}
+
+.xp-root canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.xp-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: var(--bg);
+    font-size: .65rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+    transition: opacity .6s ease;
+}
+
+.xp-loader.is-done {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.xp-loader-bar {
+    width: 180px;
+    height: 2px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.xp-loader-bar i {
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: var(--purple);
+    box-shadow: 0 0 8px var(--purple);
+    animation: xpLoad 1s ease-in-out infinite alternate;
+}
+
+@keyframes xpLoad {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(250%); }
+}
+
+.xp-hud-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(13, 13, 15, .75), transparent);
+    z-index: 2; /* above the loader, so leaving stays possible while loading */
+}
+
+.xp-hud-top > * {
+    pointer-events: auto;
+}
+
+.xp-hud-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: .15em;
+    color: var(--purple);
+}
+
+.xp-hud-logo span {
+    color: var(--text);
+}
+
+.xp-hud-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .55rem 1.1rem;
+    background: rgba(19, 19, 24, .8);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    letter-spacing: .12em;
+    transition: all .2s;
+}
+
+.xp-hud-btn:hover,
+.xp-hud-btn:focus-visible {
+    border-color: var(--purple);
+    color: var(--text);
+}
+
+.xp-hud-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 1.25rem;
+    transform: translateX(-50%);
+    max-width: calc(100% - 2rem);
+    padding: .6rem 1.1rem;
+    background: rgba(19, 19, 24, .8);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: .6rem;
+    letter-spacing: .12em;
+    color: var(--muted);
+    text-align: center;
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .xp-loader-bar i {
+        animation: none;
+        width: 100%;
+    }
+}

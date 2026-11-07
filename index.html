@@ -11,6 +11,21 @@
         href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght=0,400;0,700;1,400&family=Bebas+Neue&family=IBM+Plex+Mono:wght=300;400;600&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="experience/experience.css">
+
+    <!-- Immersive landing: shown on a plain visit to "/". A deep link such as
+         /#booking goes straight to the classic page underneath. Set before
+         first paint so the classic page never flashes. Without JS the class is
+         never added and the classic page stays as it always was. -->
+    <script>
+        if (location.hash.length <= 1) document.documentElement.classList.add('xp-landing-on');
+    </script>
+    <script type="importmap">
+        { "imports": {
+            "three": "./vendor/three/three.module.min.js",
+            "three/addons/": "./vendor/three/addons/"
+        } }
+    </script>
 </head>
 
 <body>
@@ -25,6 +40,50 @@
     <div class="cursor" id="cursor"></div>
     <div class="cursor-ring" id="cursorRing"></div>
     <div class="cursor-eq" id="cursorEq"><span></span><span></span><span></span><span></span></div>
+
+    <!-- IMMERSIVE LANDING (experience/landing.js). Sits over the classic page;
+         "Version classique" simply removes it. -->
+    <div class="xp-landing" id="xpLanding" role="dialog" aria-modal="true" aria-labelledby="xpLandingTitle">
+        <div class="xp-landing-beams" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="xp-landing-inner">
+            <div class="xp-landing-logo">&gt;_ <span>CHARLES_DEV_RECORDS</span></div>
+            <div class="xp-landing-badge"><span class="live-dot"></span> LIVE SETLIST</div>
+            <div class="xp-landing-title" id="xpLandingTitle">CODE <span class="amp">&amp;</span> MUSIQUE</div>
+            <p class="xp-landing-sub">
+                Entrez dans la salle : les projets sont sur scène, les compétences à la console,
+                et on se retrouve en coulisses.
+            </p>
+            <div class="xp-landing-actions">
+                <button type="button" class="btn-primary xp-enter" id="xpEnter" data-xp-enter>
+                    <span class="xp-enter-label">ENTRER DANS L'EXPÉRIENCE</span>
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <polygon points="6,4 20,12 6,20" />
+                    </svg>
+                </button>
+                <button type="button" class="xp-classic" id="xpClassic">VERSION CLASSIQUE</button>
+            </div>
+            <p class="xp-landing-note" id="xpLandingNote" aria-live="polite">
+                ZQSD ou flèches · souris · tactile
+            </p>
+        </div>
+        <div class="xp-landing-eq" aria-hidden="true"></div>
+    </div>
+    <!-- Safety net, independent of experience/landing.js: "Version classique"
+         always dismisses the overlay, and if the module cannot run at all
+         (no ES module support, failed download) the overlay is dropped. -->
+    <script>
+        (function () {
+            function dismiss() { document.documentElement.classList.remove('xp-landing-on'); }
+            document.getElementById('xpClassic').addEventListener('click', dismiss);
+            window.__xpLandingFailed = function () {
+                dismiss();
+                document.getElementById('xpEnter').disabled = true;
+            };
+        })();
+    </script>
+    <script nomodule>window.__xpLandingFailed();</script>
 
     <!-- NAV -->
     <nav>
@@ -57,6 +116,14 @@
                         <use href="#icon-github" />
                     </svg>
                     Mon GitHub
+                </a>
+                <a href="#" data-xp-enter>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12,2 22,8 22,16 12,22 2,16 2,8" />
+                        <polyline points="2,8 12,14 22,8" />
+                        <line x1="12" y1="14" x2="12" y2="22" />
+                    </svg>
+                    Expérience 3D
                 </a>
             </div>
         </div>
@@ -134,14 +201,14 @@
                 </div>
                 <div class="vip-rows">
                     <div class="vip-row"><span class="vip-row-label">
-                            <Img:s></Img:s>Identité :
+                            Identité :
                         </span><span class="vip-row-val">Charles Gillet</span></div>
                     <div class="vip-row"><span class="vip-row-label">Ville :</span><span
                             class="vip-row-val">Rouen</span></div>
                     <div class="vip-row"><span class="vip-row-label">Rôle :</span><span class="vip-row-val">Dev
                             Fullstack</span></div>
                     <div class="vip-row"><span class="vip-row-label">
-                            <Img:s></Img:s>GitHub :
+                            GitHub :
                         </span><a href="https://github.com/CG19z01" target="_blank"
                             class="vip-row-val">https://github.com/CG19z01</a></div>
 
@@ -271,6 +338,7 @@
 
     <!-- Scripts -->
     <script src="main.js"></script>
+    <script type="module" src="experience/landing.js" onerror="window.__xpLandingFailed()"></script>
 </body>
 
 </html>
