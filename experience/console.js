@@ -4,11 +4,12 @@
 // shows as dB): nothing is invented. Arriving at the zone, the faders slide
 // up from zero to their level; that is the only motion.
 //
-// HTML layer: a channel list (keyboard access, shown in zone 3) and a
-// detail panel with the selected channel and the whole mix.
+// HTML layer: a channel list (keyboard access, shown in zone 3, with each
+// level) and a panel giving direct access to the CV and GitHub.
 
 import * as THREE from 'three';
 import { PALETTE, STAGE, BOOTH } from './layout.js';
+import { GITHUB_URL, CV_URL, GITHUB_ICON, CV_ICON } from './backstage.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -18,6 +19,10 @@ const clampPct = v => Math.max(0, Math.min(100, Number(v) || 0));
 
 // Mixer body between the two decks (decks at x ±1.45, radius 0.3).
 export const MIXER = { width: 2.2, depth: 0.8, height: 0.07 };
+// The top face is tilted towards the visitor (front edge lower), like a
+// real desk, so the labels and faders read from the audience side. Pivot:
+// the centre of the top face. dj.js lifts the hands to match.
+export const MIXER_TILT = 0.17; // rad, about 10°
 const TOP_Y = STAGE.height + BOOTH.height + MIXER.height; // world y of the top face
 const TEX_W = 2048;
 const TEX_H = Math.round(TEX_W * MIXER.depth / MIXER.width);
@@ -53,11 +58,15 @@ export function createConsoleZone({ scene, root, skills, error }) {
 
     // ---------- 3D ----------
     const group = new THREE.Group();
-    group.position.set(BOOTH.x, 0, BOOTH.z);
+    group.position.set(BOOTH.x, TOP_Y, BOOTH.z); // children are relative to the top face
+    group.rotation.x = MIXER_TILT;
     const caseMat = new THREE.MeshStandardMaterial({ color: PALETTE.bg3, roughness: 0.6, metalness: 0.3 });
-    const caseGeo = new THREE.BoxGeometry(MIXER.width, MIXER.height, MIXER.depth);
+    // Deeper than the visible 7 cm: the extra sinks into the booth at the
+    // front and fills the gap the tilt opens at the back.
+    const caseH = MIXER.height + 0.14;
+    const caseGeo = new THREE.BoxGeometry(MIXER.width, caseH, MIXER.depth);
     const body = new THREE.Mesh(caseGeo, caseMat);
-    body.position.y = TOP_Y - MIXER.height / 2;
+    body.position.y = -caseH / 2;
     group.add(body);
 
     const canvas = document.createElement('canvas');
@@ -73,7 +82,7 @@ export function createConsoleZone({ scene, root, skills, error }) {
     const faceGeo = new THREE.PlaneGeometry(MIXER.width - 0.02, MIXER.depth - 0.02);
     const face = new THREE.Mesh(faceGeo, faceMat);
     face.rotation.x = -Math.PI / 2; // texture top = back edge (DJ side)
-    face.position.y = TOP_Y + 0.002;
+    face.position.y = 0.002;
     group.add(face);
 
     // Fader caps (3D, so they catch the light) and one invisible hit box per
@@ -87,10 +96,10 @@ export function createConsoleZone({ scene, root, skills, error }) {
             emissive: PALETTE.purple, emissiveIntensity: 0,
         });
         const cap = new THREE.Mesh(capGeo, capMat);
-        cap.position.set(colX(i), TOP_Y + 0.02, zOf(STRIP.faderBottom));
+        cap.position.set(colX(i), 0.02, zOf(STRIP.faderBottom));
         group.add(cap);
         const hit = new THREE.Mesh(hitGeo, hitMat);
-        hit.position.set(colX(i), TOP_Y + 0.04, 0);
+        hit.position.set(colX(i), 0.04, 0);
         hit.userData.channel = i;
         cap.userData.channel = i;
         group.add(hit);
@@ -212,33 +221,31 @@ export function createConsoleZone({ scene, root, skills, error }) {
         if (e.target.closest('[data-xp-close]')) handlers.close();
         const step = e.target.closest('[data-xp-step]');
         if (step) handlers.select((active + Number(step.dataset.xpStep) + n) % n);
-        const ch = e.target.closest('[data-xp-mix]');
-        if (ch) handlers.select(Number(ch.dataset.xpMix));
     });
 
+    // The panel of a channel: direct access to the CV and the GitHub
+    // profile (the user's choice, 2026-11-07). The skills themselves stay on
+    // the mixer and in the channel list, with their levels.
     function panelHtml(i) {
-        const s = skills[i];
-        const pct = clampPct(s.pct);
+        const res = [
+            { href: CV_URL, icon: CV_ICON, name: 'Mon CV', hint: 'PDF · consulter ou télécharger' },
+            { href: GITHUB_URL, icon: GITHUB_ICON, name: 'Mon GitHub', hint: 'github.com/CG19z01' },
+        ];
         return `
           <div class="xp-panel-head">
             <span class="xp-panel-track">CANAL ${pad2(i + 1)} / ${pad2(n)}</span>
-            <button type="button" class="xp-icon-btn" data-xp-close aria-label="Fermer la compétence">
+            <button type="button" class="xp-icon-btn" data-xp-close aria-label="Fermer le panneau">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
           </div>
           <div class="xp-panel-scroll">
-            <h2 class="xp-panel-title" id="xpSkillTitle" tabindex="-1">${esc(s.name)}</h2>
-            <div class="xp-level" role="img" aria-label="Niveau : ${pct} sur 100">
-              <span class="xp-level-db">${pct}<small> dB</small></span>
-              <span class="xp-level-track"><span class="xp-level-fill" style="width:${pct}%"></span></span>
-            </div>
-            <h3 class="xp-sub">Le mix complet</h3>
-            <ul class="xp-mix">${skills.map((m, k) => `
-              <li><button type="button" data-xp-mix="${k}"${k === i ? ' aria-current="true"' : ''}>
-                <span class="xp-mix-name">${esc(m.name)}</span>
-                <span class="xp-mix-track"><span class="xp-mix-fill" style="width:${clampPct(m.pct)}%"></span></span>
-                <span class="xp-mix-db">${clampPct(m.pct)} dB</span>
-              </button></li>`).join('')}
+            <h2 class="xp-panel-title" id="xpSkillTitle" tabindex="-1">Aller plus loin</h2>
+            <ul class="xp-mix xp-res">${res.map(r => `
+              <li><a href="${esc(r.href)}" target="_blank" rel="noopener noreferrer">
+                <span class="xp-res-icon">${r.icon}</span>
+                <span class="xp-res-text"><span class="xp-mix-name">${esc(r.name)}</span><span class="xp-res-hint">${esc(r.hint)}</span></span>
+                <span class="xp-res-go" aria-hidden="true">↗</span>
+              </a></li>`).join('')}
             </ul>
           </div>
           <div class="xp-panel-nav">

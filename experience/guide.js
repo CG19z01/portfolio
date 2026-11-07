@@ -6,6 +6,8 @@
 import * as THREE from 'three';
 import { BACK_Z, CORRIDOR_PATH } from './layout.js';
 
+const BACKSTAGE_SPEED = 0.8; // speed factor of the trips to / from the backstage
+
 const LOOK_YAW = 0.55;     // rad, each side
 const LOOK_PITCH = 0.22;   // rad, up/down
 const TAP_SLOP = 6;        // px of movement still counted as a click
@@ -64,7 +66,9 @@ export function createGuide(camera, dom, { reducedMotion, onTap, onHover }) {
                 fromTarget: target.clone(),
                 toTarget,
                 t: 0,
-                duration: Math.min(3.4, Math.max(1.1, 0.75 + length * 0.07)),
+                // Trips into or out of the backstage (round the LED wall) run
+                // 20 % slower: same path, duration / 0.8.
+                duration: Math.min(3.4, Math.max(1.1, 0.75 + length * 0.07)) / (crossing ? BACKSTAGE_SPEED : 1),
             };
         });
     }

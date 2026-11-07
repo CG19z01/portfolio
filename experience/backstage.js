@@ -11,11 +11,13 @@ import * as THREE from 'three';
 import { PALETTE, BOOKING_DESK } from './layout.js';
 
 const FORM_ACTION = 'https://formspree.io/f/xbdbggav';
-const GITHUB_URL = 'https://github.com/CG19z01';
-const CV_URL = 'cv-charles-gillet.pdf';
+// Same addresses as the classic page (nav menu and VIP pass); also used by
+// the console panel.
+export const GITHUB_URL = 'https://github.com/CG19z01';
+export const CV_URL = 'cv-charles-gillet.pdf';
 
-const GITHUB_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="#icon-github"/></svg>';
-const CV_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
+export const GITHUB_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><use href="#icon-github"/></svg>';
+export const CV_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
 const SEND_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
 
 function signTexture() {

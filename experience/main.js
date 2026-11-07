@@ -457,7 +457,7 @@ export async function startExperience({ onExit } = {}) {
 
         // Test hook for automated screenshots only (?xpdebug in the URL).
         if (new URLSearchParams(location.search).has('xpdebug')) {
-            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, openBooking, closeBooking, tutorial, info: () => ({ ...renderer.info.render, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, programs: renderer.info.programs.length, lights: (() => { let n = 0; scene.traverse(o => { if (o.isLight) n++; }); return n; })(), pixelRatio: renderer.getPixelRatio(), quality: quality.level }), view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
+            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, openBooking, closeBooking, tutorial, camera, info: () => ({ ...renderer.info.render, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, programs: renderer.info.programs.length, lights: (() => { let n = 0; scene.traverse(o => { if (o.isLight) n++; }); return n; })(), pixelRatio: renderer.getPixelRatio(), quality: quality.level }), view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
         }
 
         requestAnimationFrame(() => root.querySelector('.xp-loader').classList.add('is-done'));

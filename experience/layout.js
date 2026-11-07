@@ -46,8 +46,27 @@ export const REAR_STAIRS = [-8.5, 8.5].map(x => ({
 export const BACKSTAGE = { minX: -14, maxX: 14, minZ: -22, maxZ: -10 };
 export const BOOKING_DESK = { x: 0, z: -16.5, width: 3.2, depth: 1.2, height: 0.9 };
 
-// "BACKSTAGE · VIP" door frames at the floor end of each side corridor.
-export const VIP_DOORS = [-12, 12].map(x => ({ x, z: -2.2, width: 3.2, height: 3.2 }));
+// Audience stands on both sides of the stage (where the VIP door frames
+// were): raised balconies over the two side corridors (|x| 10 → 14). The
+// corridors stay open underneath: the camera's way to the backstage runs
+// at y ≈ 2.5 along x 12, a metre below the balcony floor (≈ 3.56). The
+// supporting columns stand at the corridor edges only, never in the middle.
+export const STANDS = {
+    fromZ: -9.3, toZ: -1.7, innerX: 10.2, wallX: 14,
+    rows: 4, rowDepth: 0.9, rise: 0.42, baseY: 3.7, aisle: 1.2,
+};
+
+// Dressing-room corner of the backstage, along the back wall, clear of the
+// booking desk, the crates and the cable runs.
+export const DRESSING = {
+    racks: [
+        { x: -3.2, z: -21.0, yaw: 0, length: 1.9 },
+        { x: 0.9, z: -21.1, yaw: 0, length: 1.7 },
+    ],
+    mirror: { x: 3.9, z: -21.3, yaw: -0.35 },
+    stool: { x: 3.55, z: -20.35 },
+    rug: { x: 3.6, z: -20.5 },
+};
 
 export const SPAWN = { x: 0, z: 15, facing: Math.PI }; // looking towards the stage
 
@@ -89,7 +108,7 @@ export const ZONES = [
     { id: 'dj', num: '02', name: 'LE DJ', where: 'Derrière les platines',
       pos: [0, 2.75, -2.2], target: [0, 2.15, -7.2] },
     { id: 'console', num: '03', name: 'CONSOLE', where: 'La table de mixage',
-      pos: [0, 3.3, -3.3], target: [0, 1.7, -6.3] },
+      pos: [0, 4.0, -3.5], target: [0, 1.6, -6.4] }, // high enough to read the mixer
     { id: 'backstage', num: '04', name: 'COULISSES', where: "L'arrière de la scène",
       pos: [7.4, 2.7, -11.6], target: [0, 1.2, -17.5] },
 ];
@@ -97,7 +116,7 @@ export const START_VIEW = { id: 'start', pos: [0, 3.6, 17.2], target: [0, 2.6, -
 
 // The LED wall splits the hall in two. Moving between the front and the
 // backstage goes round it through the stage-right corridor (x 10 → 14),
-// past the VIP door, like a visitor would.
+// like a visitor would.
 export const BACK_Z = LED_WALL.z;
 export const CORRIDOR_PATH = [[12, 2.4, 0.5], [12, 2.4, -6], [11.6, 2.5, -11.4]];
 
@@ -124,8 +143,8 @@ export function totemView({ x, y, z, rotY }, side) {
 // bottom sheet), seen from the audience side looking down on the faders.
 export function consoleView({ x }, side) {
     return side === 'bottom'
-        ? { pos: [x * 0.4, 3.2, -4.0], target: [x * 0.4, -0.8, -6.5] }
-        : { pos: [x * 0.5 + 0.35, 3.4, -3.2], target: [x * 0.5 + 0.6, 1.6, -6.3] };
+        ? { pos: [x * 0.4, 3.6, -4.1], target: [x * 0.4, -0.8, -6.5] }
+        : { pos: [x * 0.5 + 0.35, 4.0, -3.4], target: [x * 0.5 + 0.6, 1.5, -6.4] };
 }
 
 // Framing of the booking desk next to the booking panel.

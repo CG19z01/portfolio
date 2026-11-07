@@ -5,8 +5,9 @@
 import * as THREE from 'three';
 import {
     PALETTE, HALL, STAGE, LED_WALL, BOOTH, FRONT_STAIRS, REAR_STAIRS,
-    BOOKING_DESK, VIP_DOORS,
+    BOOKING_DESK,
 } from './layout.js';
+import { buildStands, buildDressingRoom } from './decor.js';
 
 const mat = {
     floor: new THREE.MeshStandardMaterial({ color: PALETTE.bg3, roughness: 0.6, metalness: 0 }),
@@ -22,30 +23,6 @@ function box(w, h, d, material, x, y, z) {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material);
     m.position.set(x, y + h / 2, z); // y = bottom of the box
     return m;
-}
-
-// Text drawn on a canvas, shown as a camera-facing sprite (zone signs).
-function label(text, { size = 0.9, color = '#f0eefa', accent = '#A30DAD' } = {}) {
-    const c = document.createElement('canvas');
-    const ctx = c.getContext('2d');
-    const font = "700 96px 'Bebas Neue', sans-serif";
-    ctx.font = font;
-    const w = Math.ceil(ctx.measureText(text).width) + 80;
-    c.width = w;
-    c.height = 150;
-    ctx.font = font;
-    ctx.fillStyle = 'rgba(13,13,15,.72)';
-    ctx.fillRect(0, 0, c.width, c.height);
-    ctx.fillStyle = accent;
-    ctx.fillRect(0, c.height - 8, c.width, 8);
-    ctx.fillStyle = color;
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, 40, c.height / 2 + 4);
-    const tex = new THREE.CanvasTexture(c);
-    tex.colorSpace = THREE.SRGBColorSpace;
-    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthWrite: false, transparent: true }));
-    sprite.scale.set((size * c.width) / c.height, size, 1);
-    return sprite;
 }
 
 function ledWallTexture() {
@@ -239,12 +216,9 @@ export function buildWorld(scene) {
         world.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 0.03, 6), cableMat));
     });
 
-    // VIP doors at the corridor entrances
-    VIP_DOORS.forEach(({ x, z, width, height }) => {
-        world.add(box(0.2, height, 0.3, mat.metal, x - width / 2, 0, z));
-        world.add(box(0.2, height, 0.3, mat.metal, x + width / 2, 0, z));
-        world.add(box(width + 0.2, 0.2, 0.3, mat.stageEdge, x, height, z));
-    });
+    // Dressing-room corner (racks, clothes, mirror) and the audience stands
+    world.add(buildDressingRoom());
+    world.add(buildStands());
 
     // ---------- Lighting ----------
     world.add(new THREE.HemisphereLight(PALETTE.lavender, PALETTE.glow, 1.6));
@@ -262,17 +236,6 @@ export function buildWorld(scene) {
     const backWash = new THREE.PointLight(PALETTE.purple, 40, 20, 1.3);
     backWash.position.set(0, 5, -15);
     world.add(backWash);
-
-    // ---------- Signs (the HUD names the zones; these mark the way round) ----------
-    const signs = new THREE.Group();
-    const addSign = (text, x, y, z, size) => {
-        const s = label(text, { size });
-        s.position.set(x, y, z);
-        signs.add(s);
-    };
-    addSign('VIP', -12, 4.1, -2.2, 0.6);
-    addSign('VIP', 12, 4.1, -2.2, 0.6);
-    world.add(signs);
 
     scene.add(world);
 

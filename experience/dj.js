@@ -137,7 +137,9 @@ export function createDJ(scene) {
 
     // ---------- Arms (two segments between shoulder and hand) ----------
     // The hands sit on the mixer in the middle of the booth.
-    const deckTop = BOOTH.height + 0.07 - 0.92; // in body space, before lean
+    // Mixer top (+0.07), raised 6 cm where the hands rest: the mixer is
+    // tilted towards the audience, so its back edge sits higher.
+    const deckTop = BOOTH.height + 0.07 + 0.06 - 0.92; // in body space, before lean
     const armGeo = g(new THREE.CylinderGeometry(1, 1, 1, 10)); // unit: scaled per frame
     const jointGeo = g(new THREE.SphereGeometry(1, 10, 8));
     const handGeo = g(new THREE.SphereGeometry(0.045, 10, 8));
