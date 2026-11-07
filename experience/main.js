@@ -10,6 +10,7 @@ import { createLedWall } from './ledwall.js';
 import { createDJ } from './dj.js';
 import { ZONES, START_VIEW, totemView, djPanelView, consoleView, bookingView } from './layout.js';
 import { createBackstage } from './backstage.js';
+import { createTutorial } from './tutorial.js';
 import { createConsoleZone } from './console.js';
 import { createProfilePanel } from './profile.js';
 
@@ -74,7 +75,7 @@ export async function startExperience({ onExit } = {}) {
     // Everything created so far, so teardown works at any point — including
     // halfway through a failed start, or a click on "Version classique"
     // while the scene is still loading.
-    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, profile: null, mixer: null, booking: null, cleanups: [], closed: false };
+    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, profile: null, mixer: null, booking: null, tutorial: null, cleanups: [], closed: false };
     let root = null;
     let restoreInert = () => {};
 
@@ -90,6 +91,7 @@ export async function startExperience({ onExit } = {}) {
         state.profile?.dispose();
         state.mixer?.dispose();
         state.booking?.dispose();
+        state.tutorial?.dispose();
         state.world?.dispose();
         if (state.renderer) {
             state.renderer.dispose();
@@ -172,6 +174,8 @@ export async function startExperience({ onExit } = {}) {
         state.mixer = mixer;
         const booking = createBackstage({ scene, root, onClose: () => closeBooking() });
         state.booking = booking;
+        const tutorial = createTutorial({ root, touch: window.matchMedia('(pointer: coarse)').matches });
+        state.tutorial = tutorial;
 
         // ---------- Picking (hover + click on totems and on the DJ) ----------
         const raycaster = new THREE.Raycaster();
@@ -215,6 +219,9 @@ export async function startExperience({ onExit } = {}) {
             mixer.showList(id === 'console');
             if (id === 'console') mixer.arrive(reducedMotion.matches);
         }
+
+        // A panel taking the stage ends the tutorial (the panel gets the focus).
+        listen(root, 'xp-panel-open', () => tutorial.close({ focus: false }));
 
         function restoreFocus() {
             (returnFocus?.isConnected ? returnFocus : root).focus({ preventScroll: true });
@@ -288,6 +295,7 @@ export async function startExperience({ onExit } = {}) {
             setZone('projects');
             zone1.open(i);
             root.classList.add('xp-has-panel');
+            root.dispatchEvent(new Event('xp-panel-open'));
             state.led.showProject(i);
             state.guide.goTo(totemView(zone1.place(i), panelSide()));
         }
@@ -300,6 +308,7 @@ export async function startExperience({ onExit } = {}) {
             setZone('dj');
             profile.open();
             root.classList.add('xp-has-panel');
+            root.dispatchEvent(new Event('xp-panel-open'));
             state.guide.goTo(djPanelView(panelSide()));
         }
 
@@ -312,6 +321,7 @@ export async function startExperience({ onExit } = {}) {
             setZone('console');
             mixer.open(i);
             root.classList.add('xp-has-panel');
+            root.dispatchEvent(new Event('xp-panel-open'));
             state.guide.goTo(consoleView(mixer.place(i), panelSide()));
         }
 
@@ -323,6 +333,7 @@ export async function startExperience({ onExit } = {}) {
             setZone('backstage');
             booking.open();
             root.classList.add('xp-has-panel');
+            root.dispatchEvent(new Event('xp-panel-open'));
             state.guide.goTo(bookingView(panelSide()));
         }
 
@@ -369,6 +380,11 @@ export async function startExperience({ onExit } = {}) {
             if (e.altKey || e.ctrlKey || e.metaKey) return;
             const inField = e.target.closest('input, textarea, select');
             if (e.key === 'Escape') {
+                if (tutorial.isOpen) {
+                    e.preventDefault();
+                    tutorial.close();
+                    return;
+                }
                 if (zone1.isOpen || profile.isOpen || mixer.isOpen || booking.isOpen) {
                     e.preventDefault();
                     if (zone1.isOpen) closeProject();
@@ -428,10 +444,15 @@ export async function startExperience({ onExit } = {}) {
 
         // Test hook for automated screenshots only (?xpdebug in the URL).
         if (new URLSearchParams(location.search).has('xpdebug')) {
-            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, openBooking, closeBooking, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
+            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, openBooking, closeBooking, tutorial, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
         }
 
         requestAnimationFrame(() => root.querySelector('.xp-loader').classList.add('is-done'));
+        // First visit: the tutorial once the camera has landed.
+        if (!tutorial.seen()) {
+            const t = setTimeout(() => { if (!state.closed) tutorial.open(); }, reducedMotion.matches ? 300 : 2200);
+            state.cleanups.push(() => clearTimeout(t));
+        }
         return active;
     } catch (err) {
         // Leave nothing behind: the caller shows the landing again.
