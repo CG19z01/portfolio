@@ -1337,3 +1337,127 @@ footer {
     background: var(--purple-dark);
     border-radius: 2px
 }
+/* ==========================================================================
+   RESPONSIVE — the layout above is desktop-first; these blocks only adapt
+   spacing and columns, the content and the design stay the same.
+   ========================================================================== */
+
+@media (max-width: 1000px) {
+    nav {
+        padding: 0 1.5rem;
+    }
+
+    .nav-links {
+        gap: 1.5rem;
+    }
+
+    .nav-links a {
+        font-size: 1rem;
+        letter-spacing: .12em;
+    }
+
+    /* Decorative cabinets: on narrower screens they sit over the carousel. */
+    .speaker {
+        display: none;
+    }
+
+    .about-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        max-width: 640px;
+    }
+}
+
+@media (max-width: 900px) {
+    /* Nav on two rows: logo + menu button, then the section links. */
+    nav {
+        flex-wrap: wrap;
+        height: auto;
+        padding: .6rem 1rem .4rem;
+        row-gap: .35rem;
+    }
+
+    .nav-logo {
+        font-size: 1.1rem;
+        letter-spacing: .1em;
+    }
+
+    .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+        gap: .5rem;
+    }
+
+    .nav-links a {
+        font-size: .82rem;
+        letter-spacing: .08em;
+        padding: .35rem 0;
+    }
+
+    #hero {
+        padding-top: 120px;
+    }
+
+    .eq-bars {
+        padding: 1.5rem 1rem;
+    }
+
+    .eq-footer {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    section,
+    #hero {
+        scroll-margin-top: 92px;
+    }
+}
+
+@media (max-width: 640px) {
+    /* Anchors land below the taller fixed nav. */
+    section {
+        padding: 4.5rem 1.25rem;
+    }
+
+    #hero {
+        padding: 120px 1rem 2rem;
+    }
+
+    .hero-glow {
+        width: 100vw;
+        height: 100vw;
+    }
+
+    .slide {
+        padding: 1.5rem 1.1rem 4.5rem;
+    }
+
+    .slide-img {
+        height: 180px;
+    }
+
+    .section-header {
+        margin-bottom: 2.5rem;
+    }
+
+    .eq-bar-row {
+        grid-template-columns: 92px 1fr auto;
+        gap: .75rem;
+    }
+
+    .eq-skill-name {
+        font-size: .62rem;
+        letter-spacing: .06em;
+        overflow-wrap: anywhere;
+    }
+
+    .contact-form-wrap {
+        padding: 1.5rem 1.1rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
