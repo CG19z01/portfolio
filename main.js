@@ -246,5 +246,10 @@ const eqObs = new IntersectionObserver(entries => {
 
 eqObs.observe(eqPanel);
 
-// Auto-slide carousel
-setInterval(() => slide(1), 4000);
+// Auto-slide carousel — skipped when the visitor asked for reduced motion;
+// the prev/next buttons still work. Re-checked on every tick so toggling the
+// OS setting takes effect without a reload.
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+setInterval(() => {
+    if (!reducedMotion.matches) slide(1);
+}, 4000);

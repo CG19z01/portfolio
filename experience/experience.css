@@ -1,0 +1,1083 @@
+/* ==========================================================================
+   Immersive experience — landing overlay + 3D shell.
+   Every colour comes from the :root tokens in style.css.
+   ========================================================================== */
+
+/* ---------- Landing ---------- */
+
+.xp-landing {
+    display: none;
+}
+
+.xp-landing-on,
+.xp-landing-on body,
+.xp-on,
+.xp-on body {
+    overflow: hidden;
+}
+
+/* While the 3D is open the classic page is taken out of layout: nothing
+   paints behind the canvas, and its content width (wider than a phone
+   screen) can no longer widen the mobile viewport the HUD is laid out in.
+   It is inert anyway, and comes back untouched on exit. */
+.xp-on body > :not(.xp-root):not(.icon-sprite):not(.cursor):not(.cursor-ring):not(.cursor-eq):not(script) {
+    display: none !important;
+}
+
+.xp-landing-on .xp-landing {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse 70% 55% at 50% 100%, rgba(163, 13, 173, .35) 0%, transparent 70%),
+        radial-gradient(circle at 50% 85%, var(--bg-glow) 0%, transparent 75%),
+        var(--bg);
+}
+
+.xp-landing-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.xp-landing-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    letter-spacing: .15em;
+    color: var(--purple);
+    margin-bottom: 2.5rem;
+    animation: fadeUp .8s ease both;
+}
+
+.xp-landing-logo span {
+    color: var(--text);
+}
+
+.xp-landing-badge {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: .65rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    animation: fadeUp .8s .1s ease both;
+}
+
+.xp-landing-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3.5rem, 12vw, 9rem);
+    line-height: .9;
+    letter-spacing: .05em;
+    text-shadow: 0 0 60px rgba(163, 13, 173, .45);
+    animation: fadeUp .8s .2s ease both;
+}
+
+.xp-landing-title .amp {
+    color: var(--purple);
+}
+
+.xp-landing-sub {
+    margin: 1.5rem 0 2.5rem;
+    max-width: 520px;
+    font-size: .8rem;
+    line-height: 1.9;
+    color: var(--muted);
+    animation: fadeUp .8s .3s ease both;
+}
+
+.xp-landing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    animation: fadeUp .8s .4s ease both;
+}
+
+.xp-enter {
+    padding: 1.1rem 2.2rem;
+    font-size: .75rem;
+    box-shadow: 0 0 0 0 rgba(163, 13, 173, .6);
+    animation: xpEnterPulse 2.4s ease-out infinite;
+}
+
+.xp-enter svg {
+    width: 12px;
+    height: 12px;
+}
+
+.xp-enter:disabled {
+    opacity: .5;
+    animation: none;
+    transform: none;
+}
+
+@keyframes xpEnterPulse {
+    0% { box-shadow: 0 0 0 0 rgba(163, 13, 173, .55); }
+    70%, 100% { box-shadow: 0 0 0 18px rgba(163, 13, 173, 0); }
+}
+
+.xp-classic {
+    padding: 1.05rem 1.8rem;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .15em;
+    transition: all .25s;
+}
+
+.xp-classic:hover,
+.xp-classic:focus-visible {
+    border-color: var(--purple);
+    color: var(--text);
+}
+
+.xp-landing-note {
+    margin-top: 1.75rem;
+    font-size: .62rem;
+    letter-spacing: .18em;
+    color: var(--muted);
+    animation: fadeUp .8s .5s ease both;
+}
+
+.xp-landing-note.is-error {
+    color: var(--text);
+    max-width: 420px;
+    line-height: 1.8;
+    letter-spacing: .08em;
+}
+
+/* Stage light beams sweeping down from the top edge */
+.xp-landing-beams {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.xp-landing-beams span {
+    position: absolute;
+    top: -10%;
+    width: 22vw;
+    min-width: 160px;
+    height: 120%;
+    background: linear-gradient(180deg, rgba(176, 106, 255, .22) 0%, rgba(163, 13, 173, .06) 55%, transparent 85%);
+    clip-path: polygon(46% 0, 54% 0, 100% 100%, 0 100%);
+    transform-origin: 50% 0;
+    filter: blur(2px);
+    animation: xpBeam 9s ease-in-out infinite alternate;
+}
+
+.xp-landing-beams span:nth-child(1) { left: 2%;  animation-delay: -1s; }
+.xp-landing-beams span:nth-child(2) { left: 20%; animation-delay: -4s; opacity: .7; }
+.xp-landing-beams span:nth-child(3) { left: 39%; animation-delay: -2s; }
+.xp-landing-beams span:nth-child(4) { left: 58%; animation-delay: -6s; opacity: .7; }
+.xp-landing-beams span:nth-child(5) { left: 76%; animation-delay: -3s; }
+
+@keyframes xpBeam {
+    from { transform: rotate(-14deg); }
+    to   { transform: rotate(14deg); }
+}
+
+/* Crowd-level equalizer along the bottom edge (bars built by landing.js) */
+.xp-landing-eq {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 90px;
+    z-index: 1;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    padding: 0 3px;
+    pointer-events: none;
+    opacity: .5;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+}
+
+.xp-landing-eq i {
+    flex: 1;
+    height: 100%;
+    background: linear-gradient(0deg, var(--purple-dark), var(--purple));
+    transform-origin: 50% 100%;
+    animation: xpEq 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes xpEq {
+    from { transform: scaleY(.08); }
+    to   { transform: scaleY(var(--h, .6)); }
+}
+
+@media (max-width: 560px) {
+    .xp-landing-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .xp-enter,
+    .xp-classic {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .xp-landing-beams span,
+    .xp-landing-eq i,
+    .xp-enter {
+        animation: none;
+    }
+
+    .xp-landing-eq i {
+        transform: scaleY(calc(var(--h, .6) * .6));
+    }
+
+    .xp-landing-logo,
+    .xp-landing-badge,
+    .xp-landing-title,
+    .xp-landing-sub,
+    .xp-landing-actions,
+    .xp-landing-note {
+        animation: none;
+    }
+}
+
+/* ---------- 3D shell ---------- */
+
+.xp-root {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    background: var(--bg);
+    outline: none;
+}
+
+.xp-root canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.xp-loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: var(--bg);
+    font-size: .65rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+    transition: opacity .6s ease;
+}
+
+.xp-loader.is-done {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.xp-loader-bar {
+    width: 180px;
+    height: 2px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.xp-loader-bar i {
+    display: block;
+    height: 100%;
+    width: 40%;
+    background: var(--purple);
+    box-shadow: 0 0 8px var(--purple);
+    animation: xpLoad 1s ease-in-out infinite alternate;
+}
+
+@keyframes xpLoad {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(250%); }
+}
+
+.xp-hud-top {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(13, 13, 15, .75), transparent);
+    z-index: 2; /* above the loader, so leaving stays possible while loading */
+}
+
+.xp-hud-top > * {
+    pointer-events: auto;
+}
+
+.xp-hud-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: .15em;
+    color: var(--purple);
+}
+
+.xp-hud-logo span {
+    color: var(--text);
+}
+
+.xp-hud-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .55rem 1.1rem;
+    background: rgba(19, 19, 24, .8);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    letter-spacing: .12em;
+    transition: all .2s;
+}
+
+.xp-hud-btn:hover,
+.xp-hud-btn:focus-visible {
+    border-color: var(--purple);
+    color: var(--text);
+}
+
+.xp-hud-hint {
+    position: absolute;
+    left: 50%;
+    bottom: calc(1.25rem + 64px);
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: calc(100% - 2rem);
+    padding: .5rem 1rem;
+    background: rgba(19, 19, 24, .7);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: .6rem;
+    letter-spacing: .1em;
+    color: var(--muted);
+    text-align: center;
+    pointer-events: none;
+}
+
+/* ---------- Glass surface shared by the HUD pieces ---------- */
+.xp-zone-card,
+.xp-zonenav,
+.xp-setlist,
+.xp-panel {
+    background: rgba(19, 19, 24, .82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+}
+
+/* Where am I: zone number, name, short caption */
+.xp-zone-card {
+    position: absolute;
+    top: 72px;
+    left: 1.25rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: .75rem;
+    align-items: baseline;
+    padding: .7rem 1.1rem .75rem;
+    border-radius: 10px;
+    border-left: 2px solid var(--purple);
+    pointer-events: none;
+}
+.xp-zone-num {
+    grid-row: span 2;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--purple);
+}
+.xp-zone-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: .1em;
+    line-height: 1.05;
+}
+.xp-zone-where {
+    font-size: .58rem;
+    letter-spacing: .14em;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+
+/* Zone navigator: always reachable, bottom centre */
+.xp-zonenav {
+    position: absolute;
+    left: 50%;
+    bottom: 1.25rem;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    padding: 5px;
+    border-radius: 100px;
+    max-width: calc(100% - 1.5rem);
+}
+.xp-zonenav button {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    min-height: 44px;
+    padding: 0 1.05rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 100px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    letter-spacing: .12em;
+    white-space: nowrap;
+    transition: color .2s, background .2s, border-color .2s;
+}
+.xp-zonenav button:hover,
+.xp-zonenav button:focus-visible {
+    color: var(--text);
+    border-color: var(--border);
+}
+.xp-zonenav button[aria-current] {
+    background: var(--purple);
+    color: var(--text);
+}
+.xp-zonenav-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: .05em;
+}
+.xp-zonenav-home {
+    width: 44px;
+    padding: 0 !important;
+    justify-content: center;
+}
+.xp-zonenav-home svg,
+.xp-icon-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ---------- Zone 1: setlist ---------- */
+.xp-setlist {
+    position: absolute;
+    left: 1.25rem;
+    top: 168px;
+    width: 230px;
+    max-height: calc(100% - 168px - 150px);
+    overflow-y: auto;
+    padding: .9rem .6rem .6rem;
+    border-radius: 10px;
+}
+.xp-setlist-head {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: 0 .5rem .6rem;
+    font-size: .56rem;
+    letter-spacing: .18em;
+    color: var(--muted);
+}
+.xp-setlist ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.xp-setlist button {
+    display: flex;
+    align-items: baseline;
+    gap: .7rem;
+    width: 100%;
+    min-height: 40px;
+    padding: .55rem .5rem;
+    background: none;
+    border: 0;
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    text-align: left;
+    transition: background .2s, color .2s;
+}
+.xp-setlist button:hover,
+.xp-setlist button:focus-visible {
+    background: rgba(163, 13, 173, .14);
+}
+.xp-setlist button[aria-current] {
+    background: rgba(163, 13, 173, .28);
+}
+.xp-setlist-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: .95rem;
+    color: var(--purple);
+}
+.xp-setlist-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Zone 3: channel list ---------- */
+.xp-channel-db {
+    margin-left: auto;
+    flex: none;
+    font-size: .62rem;
+    color: var(--lavender, #b06aff);
+}
+
+/* ---------- Zone 1: project panel ---------- */
+.xp-panel {
+    position: absolute;
+    top: 72px;
+    right: 1.25rem;
+    bottom: calc(1.25rem + 64px);
+    width: min(420px, calc(100% - 2.5rem));
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    border-top: 2px solid var(--purple);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .5), 0 0 40px rgba(163, 13, 173, .12);
+    opacity: 0;
+    transform: translateX(24px);
+    transition: opacity .35s ease, transform .35s ease;
+}
+.xp-panel.is-in {
+    opacity: 1;
+    transform: none;
+}
+.xp-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .7rem .7rem .7rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+}
+.xp-panel-track {
+    font-size: .6rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+}
+.xp-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    color: var(--muted);
+    transition: color .2s, border-color .2s;
+}
+.xp-icon-btn:hover,
+.xp-icon-btn:focus-visible {
+    color: var(--text);
+    border-color: var(--purple);
+}
+.xp-panel-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 1.25rem;
+}
+.xp-panel-img {
+    aspect-ratio: 16 / 10;
+    margin-bottom: 1.1rem;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+}
+.xp-panel-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.xp-panel-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: 2.4rem;
+    line-height: 1;
+    letter-spacing: .04em;
+    margin: 0 0 .75rem;
+    outline: none;
+}
+.xp-panel-desc {
+    font-size: .78rem;
+    line-height: 1.8;
+    color: var(--text);
+    opacity: .85;
+    margin: 0 0 1.1rem;
+}
+.xp-tags {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .45rem;
+    margin: 0 0 1.25rem;
+    padding: 0;
+}
+.xp-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+}
+.xp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 40px;
+    padding: 0 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    background: rgba(163, 13, 173, .08);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .65rem;
+    letter-spacing: .1em;
+    text-decoration: none;
+    transition: all .25s;
+}
+.xp-link:hover,
+.xp-link:focus-visible {
+    border-color: var(--purple);
+    background: var(--purple-dark);
+}
+.xp-link svg {
+    width: 15px;
+    height: 15px;
+}
+.xp-panel-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem 1.25rem;
+    border-top: 1px solid var(--border);
+}
+.xp-panel-nav .xp-hud-btn:disabled {
+    opacity: .4;
+}
+
+/* ---------- Zone 2: DJ presentation (tabs) ---------- */
+.xp-profile-id {
+    padding: 1.1rem 1.25rem .4rem;
+}
+.xp-profile-id .xp-panel-title {
+    margin: 0;
+}
+.xp-profile-role {
+    font-size: .62rem;
+    letter-spacing: .2em;
+    color: var(--purple);
+    text-transform: uppercase;
+}
+/* Tabs styled as deck selectors A / B / C */
+.xp-tabs {
+    display: flex;
+    gap: .4rem;
+    padding: .8rem 1.25rem .9rem;
+    border-bottom: 1px solid var(--border);
+}
+.xp-tabs [role="tab"] {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    min-height: 40px;
+    padding: 0 .6rem;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .62rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    transition: color .2s, border-color .2s, background .2s, box-shadow .2s;
+}
+.xp-tabs [role="tab"]:hover,
+.xp-tabs [role="tab"]:focus-visible {
+    color: var(--text);
+    border-color: var(--purple);
+}
+.xp-tabs [role="tab"][aria-selected="true"] {
+    color: var(--text);
+    background: rgba(163, 13, 173, .22);
+    border-color: var(--purple);
+    box-shadow: 0 0 14px rgba(163, 13, 173, .35);
+}
+.xp-tab-deck {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0;
+    color: var(--purple);
+}
+.xp-profile .xp-panel-scroll:focus-visible {
+    outline: 1px solid var(--purple);
+    outline-offset: -1px;
+}
+.xp-about-head {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.7rem;
+    line-height: 1;
+    letter-spacing: .04em;
+    margin: 0 0 .8rem;
+}
+.xp-about-head span {
+    color: var(--purple);
+}
+.xp-sub {
+    margin: 1.4rem 0 .7rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: .6rem;
+    letter-spacing: .22em;
+    color: var(--purple);
+    text-transform: uppercase;
+}
+.xp-sub:first-child {
+    margin-top: 0;
+}
+.xp-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 1rem;
+    border-left: 1px solid var(--border);
+}
+.xp-timeline li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+    padding: 0 0 1rem;
+}
+.xp-timeline li::before {
+    content: '';
+    position: absolute;
+    left: calc(-1rem - 4px);
+    top: .3rem;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--purple);
+    box-shadow: 0 0 8px var(--purple);
+}
+.xp-tl-when {
+    font-size: .58rem;
+    letter-spacing: .14em;
+    color: var(--muted);
+    text-transform: uppercase;
+}
+.xp-tl-title {
+    font-size: .78rem;
+    color: var(--text);
+}
+.xp-tl-where {
+    color: var(--muted);
+}
+.xp-tl-detail {
+    font-size: .68rem;
+    line-height: 1.6;
+    color: var(--text);
+    opacity: .7;
+}
+.xp-contact {
+    width: 100%;
+    justify-content: center;
+    padding: .85rem 1rem;
+    font-size: .65rem;
+}
+
+/* While a project is open, the hint would sit under the panel: drop it. */
+.xp-has-panel .xp-hud-hint {
+    display: none;
+}
+
+/* ---------- Zone 3: channel panel (CV + GitHub) ---------- */
+.xp-mix {
+    list-style: none;
+    margin: .4rem 0 0;
+    padding: 0;
+}
+.xp-mix a {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+    width: 100%;
+    min-height: 56px;
+    padding: .7rem .8rem;
+    margin-bottom: .5rem;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    text-decoration: none;
+    transition: background .2s, color .2s, border-color .2s;
+}
+.xp-mix a:hover,
+.xp-mix a:focus-visible { background: rgba(163, 13, 173, .14); color: var(--text); border-color: var(--purple); }
+.xp-res-icon svg { width: 22px; height: 22px; display: block; color: var(--purple); }
+.xp-res-text { display: flex; flex-direction: column; gap: .2rem; flex: 1; min-width: 0; }
+.xp-res .xp-mix-name { color: var(--text); font-size: .8rem; letter-spacing: .06em; }
+.xp-res-hint { font-size: .6rem; letter-spacing: .1em; color: var(--muted); }
+.xp-res-go { color: var(--purple); font-size: .9rem; }
+
+/* ---------- Zone 4: booking form ---------- */
+.xp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.2rem 0 .4rem;
+}
+.xp-form .form-textarea { height: 120px; }
+.xp-form .btn-submit[aria-disabled="true"] { opacity: .6; cursor: progress; }
+.xp-form-status {
+    min-height: 1.2em;
+    margin: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .7rem;
+    color: var(--muted);
+}
+.xp-form-status[data-kind="ok"] { color: var(--purple); }
+.xp-form-status[data-kind="error"] { color: #ee0055; }
+
+@media (max-width: 759px) {
+    .xp-hud-top {
+        padding: 0 .75rem;
+    }
+    .xp-hud-logo {
+        font-size: .95rem;
+        letter-spacing: .08em;
+        white-space: nowrap;
+    }
+    .xp-hide-sm {
+        display: none;
+    }
+    .xp-zone-card {
+        top: 64px;
+        left: .75rem;
+        padding: .5rem .8rem;
+    }
+    .xp-zone-num { font-size: 1.5rem; }
+    .xp-zone-name { font-size: 1.1rem; }
+    .xp-hud-hint { display: none; }
+    .xp-zonenav {
+        left: .5rem;
+        right: .5rem;
+        bottom: .75rem;
+        transform: none;
+        max-width: none;
+        justify-content: space-between;
+    }
+    .xp-zonenav button {
+        flex: 1;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0;
+        padding: .3rem .2rem;
+        font-size: .5rem;
+        letter-spacing: .06em;
+        border-radius: 14px;
+    }
+    .xp-zonenav-home {
+        flex: 0 0 44px !important;
+    }
+    /* Setlist becomes a swipeable strip above the navigator */
+    .xp-setlist {
+        top: auto;
+        left: .5rem;
+        right: .5rem;
+        bottom: calc(.75rem + 66px);
+        width: auto;
+        max-height: none;
+        padding: .5rem;
+        overflow: hidden;
+    }
+    .xp-setlist-head { padding: 0 .25rem .4rem; }
+    .xp-setlist ol {
+        display: flex;
+        gap: .4rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+    }
+    .xp-setlist li { scroll-snap-align: start; }
+    .xp-setlist button {
+        width: auto;
+        background: rgba(163, 13, 173, .1);
+        white-space: nowrap;
+    }
+    /* Panel becomes a bottom sheet; the totem stays visible above it */
+    .xp-panel {
+        top: auto;
+        left: .5rem;
+        right: .5rem;
+        bottom: calc(.75rem + 66px);
+        width: auto;
+        max-height: 58%;
+        transform: translateY(24px);
+    }
+    .xp-has-panel .xp-setlist { display: none; }
+    .xp-panel-img { aspect-ratio: 16 / 8; }
+    .xp-panel-title { font-size: 2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .xp-loader-bar i {
+        animation: none;
+        width: 100%;
+    }
+    .xp-panel {
+        transition: none;
+    }
+}
+
+/* ---------- Tutorial ---------- */
+.xp-help {
+    margin-left: auto;
+    margin-right: .5rem;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    justify-content: center;
+    font-size: .85rem;
+    letter-spacing: 0;
+    pointer-events: auto;
+}
+@media (max-width: 420px) {
+    .xp-help { width: 32px; height: 32px; margin-right: .4rem; }
+    .xp-hud-top .xp-hud-logo { font-size: .8rem; letter-spacing: .04em; }
+}
+/* Right-hand side, where the panels open (never both at once: opening a
+   panel closes the tutorial), so the projects in the middle stay clear. */
+.xp-tuto {
+    position: absolute;
+    top: 72px;
+    right: 1.25rem;
+    width: min(360px, calc(100% - 2.5rem));
+    padding: 1.1rem 1.25rem 1rem;
+    background: rgba(19, 19, 24, .9);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--purple);
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(111, 14, 173, .35);
+    animation: xp-tuto-in .35s ease-out;
+}
+.xp-tuto-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .58rem;
+    letter-spacing: .2em;
+    color: var(--muted);
+}
+.xp-tuto-dots { display: flex; gap: 5px; }
+.xp-tuto-dots i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+}
+.xp-tuto-dots i.is-on { background: var(--purple); }
+.xp-tuto-title {
+    margin: .6rem 0 .4rem;
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400;
+    font-size: 1.7rem;
+    letter-spacing: .03em;
+    color: var(--text);
+}
+.xp-tuto-text {
+    margin: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .72rem;
+    line-height: 1.7;
+    color: var(--text);
+    opacity: .85;
+}
+.xp-tuto-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+}
+.xp-tuto-next { padding: .7rem 1.4rem; }
+.xp-has-tuto .xp-hud-hint { display: none; }
+/* The HUD piece the current step talks about */
+.xp-tuto-focus {
+    box-shadow: 0 0 0 2px var(--purple), 0 0 24px rgba(163, 13, 173, .7);
+    animation: xp-tuto-pulse 1.6s ease-in-out infinite;
+}
+@keyframes xp-tuto-in {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: none; }
+}
+@keyframes xp-tuto-pulse {
+    50% { box-shadow: 0 0 0 2px var(--purple), 0 0 6px rgba(163, 13, 173, .3); }
+}
+@media (max-width: 759px) {
+    /* Phones: no room at the side, so it stays above the zone bar */
+    .xp-tuto {
+        top: auto;
+        left: .5rem;
+        right: .5rem;
+        width: auto;
+        bottom: calc(.75rem + 66px + .75rem);
+        animation: none;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .xp-tuto, .xp-tuto-focus { animation: none; }
+    .live-dot { animation: none; } /* also on the classic page */
+}
+/* Touch screens: comfortable 44 px targets for the HUD controls */
+@media (max-width: 759px) {
+    .xp-hud-btn,
+    .xp-tabs [role="tab"] { min-height: 44px; }
+    .xp-icon-btn { width: 44px; height: 44px; }
+    .xp-help { width: 44px; height: 44px; }
+}
+
+/* The rules above give these a display value, which would beat [hidden]. */
+.xp-tuto[hidden],
+.xp-setlist[hidden],
+.xp-panel[hidden] {
+    display: none;
+}
