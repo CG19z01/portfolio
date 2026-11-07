@@ -1,10 +1,11 @@
-// Zone 1 — the projects. One LED totem per project on the arc in front of the
-// stage, plus the HTML layer that actually presents them: a setlist (quick
+// Zone 1 — the projects. One small LED totem per project on the arc in
+// front of the stage, where the crowd stands, plus the HTML layer that actually presents them: a setlist (quick
 // access, keyboard friendly) and a detail panel. Every field comes from
 // /api/projects, exactly as the admin panel saved it.
 
 import * as THREE from 'three';
-import { PALETTE, totemPositions } from './layout.js';
+import { PALETTE, TOTEM_SCALE, totemPositions } from './layout.js';
+import { loadImage, drawCover } from './images.js';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
@@ -28,15 +29,7 @@ function drawScreen(ctx, project, index, img) {
     ctx.fillRect(0, 0, W, H);
 
     if (img) {
-        // object-fit: cover into the top area
-        const s = Math.max(W / img.naturalWidth, imgH / img.naturalHeight);
-        const w = img.naturalWidth * s, h = img.naturalHeight * s;
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(0, 0, W, imgH);
-        ctx.clip();
-        ctx.drawImage(img, (W - w) / 2, (imgH - h) / 2, w, h);
-        ctx.restore();
+        drawCover(ctx, img, 0, 0, W, imgH);
     } else {
         ctx.fillStyle = 'rgba(163,13,173,.25)';
         ctx.fillRect(0, 0, W, imgH);
@@ -79,17 +72,12 @@ function screenTexture(project, index) {
     tex.anisotropy = 4;
     drawScreen(ctx, project, index, null);
 
-    if (project.img) {
-        const img = new Image();
-        img.crossOrigin = 'anonymous'; // Blob storage sends CORS headers; needed for WebGL
-        img.decoding = 'async';
-        img.onload = () => {
-            drawScreen(ctx, project, index, img);
-            tex.needsUpdate = true;
-        };
-        // On error the numbered placeholder simply stays.
-        img.src = project.img;
-    }
+    // On failure the numbered placeholder simply stays.
+    loadImage(project.img).then(img => {
+        if (!img) return;
+        drawScreen(ctx, project, index, img);
+        tex.needsUpdate = true;
+    });
     return tex;
 }
 
@@ -135,6 +123,7 @@ function buildTotems(scene, projects) {
 
         g.position.set(place.x, 0, place.z);
         g.rotation.y = place.rotY;
+        g.scale.setScalar(TOTEM_SCALE);
         group.add(g);
 
         screen.userData.totem = i;
@@ -161,6 +150,7 @@ function buildTotems(scene, projects) {
         },
     };
 }
+
 
 // ---------- HTML: setlist + detail panel ----------
 

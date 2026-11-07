@@ -4,7 +4,7 @@
 
 import * as THREE from 'three';
 import {
-    PALETTE, HALL, STAGE, LED_WALL, BOOTH, DJ_SPOT, FRONT_STAIRS, REAR_STAIRS,
+    PALETTE, HALL, STAGE, LED_WALL, BOOTH, FRONT_STAIRS, REAR_STAIRS,
     BOOKING_DESK, VIP_DOORS,
 } from './layout.js';
 
@@ -16,7 +16,6 @@ const mat = {
     metal: new THREE.MeshStandardMaterial({ color: PALETTE.border, roughness: 0.45, metalness: 0.3 }),
     black: new THREE.MeshStandardMaterial({ color: PALETTE.bg, roughness: 0.8 }),
     case: new THREE.MeshStandardMaterial({ color: PALETTE.border, roughness: 0.55, metalness: 0.1 }),
-    placeholder: new THREE.MeshStandardMaterial({ color: PALETTE.muted, roughness: 0.7 }),
 };
 
 function box(w, h, d, material, x, y, z) {
@@ -172,7 +171,7 @@ export function buildWorld(scene) {
     world.add(box(LED_WALL.width + 0.4, LED_WALL.bottom, 0.5, mat.metal, 0, STAGE.height, LED_WALL.z));
     animated.push(time => { ledMat.emissiveIntensity = 1 + 0.12 * Math.sin(time * 0.8); });
 
-    // DJ booth (Zone 3) + DJ placeholder (Zone 2)
+    // DJ booth (Zone 3). The DJ himself (Zone 2) is built by dj.js.
     world.add(box(BOOTH.width, BOOTH.height, BOOTH.depth, mat.black, BOOTH.x, STAGE.height, BOOTH.z));
     world.add(box(BOOTH.width, 0.03, 0.04, mat.stageEdge, BOOTH.x, STAGE.height + BOOTH.height - 0.15, BOOTH.z + BOOTH.depth / 2 + 0.02));
     const deckTop = STAGE.height + BOOTH.height;
@@ -182,9 +181,6 @@ export function buildWorld(scene) {
         world.add(deck);
     });
     world.add(box(1.4, 0.06, 0.7, mat.case, BOOTH.x, deckTop, BOOTH.z));
-    const dj = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 1.1, 6, 12), mat.placeholder);
-    dj.position.set(DJ_SPOT.x, STAGE.height + 0.85, DJ_SPOT.z);
-    world.add(dj);
 
     // Truss + moving heads
     const trussY = 7.6;
@@ -280,6 +276,7 @@ export function buildWorld(scene) {
     scene.add(world);
 
     return {
+        ledMaterial: ledMat, // the LED wall content is driven by ledwall.js
         update(time) { animated.forEach(fn => fn(time)); },
         dispose() {
             world.traverse(o => {

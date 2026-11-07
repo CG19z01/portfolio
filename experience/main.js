@@ -6,6 +6,8 @@ import { buildWorld } from './world.js';
 import { isolate } from './isolate.js';
 import { createGuide } from './guide.js';
 import { createProjectsZone } from './projects.js';
+import { createLedWall } from './ledwall.js';
+import { createDJ } from './dj.js';
 import { ZONES, START_VIEW, totemView } from './layout.js';
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -52,7 +54,7 @@ function buildShell(onQuit) {
 }
 
 const ZONE_NOTES = {
-    start: 'Choisissez une zone en bas de l\'écran, ou cliquez sur un écran de la scène.',
+    start: 'Choisissez une zone en bas de l\'écran, ou cliquez sur un écran devant la scène.',
     projects: 'Cliquez sur un écran ou un titre de la setlist pour ouvrir un projet.',
     dj: 'Zone en préparation : la présentation arrive bientôt.',
     console: 'Zone en préparation : les compétences arrivent bientôt.',
@@ -69,7 +71,7 @@ export async function startExperience({ onExit } = {}) {
     // Everything created so far, so teardown works at any point — including
     // halfway through a failed start, or a click on "Version classique"
     // while the scene is still loading.
-    const state = { renderer: null, guide: null, world: null, zone: null, cleanups: [], closed: false };
+    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, cleanups: [], closed: false };
     let root = null;
     let restoreInert = () => {};
 
@@ -80,6 +82,8 @@ export async function startExperience({ onExit } = {}) {
         state.cleanups.forEach(fn => fn());
         state.guide?.dispose();
         state.zone?.dispose();
+        state.led?.dispose();
+        state.dj?.dispose();
         state.world?.dispose();
         if (state.renderer) {
             state.renderer.dispose();
@@ -131,7 +135,7 @@ export async function startExperience({ onExit } = {}) {
         // shows roughly the same width of the room as on a desktop.
         const fitFov = () => {
             camera.aspect = window.innerWidth / window.innerHeight;
-            camera.fov = camera.aspect < 1 ? Math.min(78, 50 + (1 - camera.aspect) * 45) : 50;
+            camera.fov = camera.aspect < 1 ? Math.min(84, 50 + (1 - camera.aspect) * 56) : 50;
             camera.updateProjectionMatrix();
         };
         fitFov();
@@ -154,6 +158,8 @@ export async function startExperience({ onExit } = {}) {
         state.world = buildWorld(scene);
         const zone1 = createProjectsZone({ scene, root, projects, error });
         state.zone = zone1;
+        state.led = createLedWall(state.world.ledMaterial, projects, { reducedMotion });
+        state.dj = createDJ(scene);
 
         // ---------- Picking (hover + click on totems) ----------
         const raycaster = new THREE.Raycaster();
@@ -193,6 +199,7 @@ export async function startExperience({ onExit } = {}) {
             if (!zone1.isOpen) return;
             zone1.close();
             root.classList.remove('xp-has-panel');
+            state.led.resume();
             (returnFocus?.isConnected ? returnFocus : root).focus({ preventScroll: true });
             returnFocus = null;
             if (!stay) goZone('projects');
@@ -201,8 +208,9 @@ export async function startExperience({ onExit } = {}) {
         function goZone(id) {
             if (zone1.isOpen) closeProject({ stay: true });
             setZone(id);
-            const view = id === 'start' ? START_VIEW : ZONES.find(z => z.id === id);
-            state.guide.goTo(view);
+            const zone = id === 'start' ? START_VIEW : ZONES.find(z => z.id === id);
+            const portrait = window.innerWidth < window.innerHeight;
+            state.guide.goTo(portrait && zone.portrait ? zone.portrait : zone);
         }
 
         function openProject(i, from) {
@@ -211,6 +219,7 @@ export async function startExperience({ onExit } = {}) {
             setZone('projects');
             zone1.open(i);
             root.classList.add('xp-has-panel');
+            state.led.showProject(i);
             state.guide.goTo(totemView(zone1.place(i), panelSide()));
         }
 
@@ -277,12 +286,14 @@ export async function startExperience({ onExit } = {}) {
             state.guide.update(dt);
             state.world.update(t);
             zone1.update(t, dt);
+            state.led.update(dt);
+            state.dj.update(t);
             renderer.render(scene, camera);
         });
 
         // Test hook for automated screenshots only (?xpdebug in the URL).
         if (new URLSearchParams(location.search).has('xpdebug')) {
-            window.__xp = { goZone, openProject, closeProject, get travelling() { return state.guide.travelling; } };
+            window.__xp = { goZone, openProject, closeProject, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
         }
 
         requestAnimationFrame(() => root.querySelector('.xp-loader').classList.add('is-done'));

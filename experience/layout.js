@@ -31,7 +31,7 @@ export const LED_WALL = { z: -9.5, width: 14, bottom: 0.6, height: 5.6, depth: 0
 
 // DJ booth = Zone 3 (the mixing console). The DJ (Zone 2) stands behind it.
 export const BOOTH = { x: 0, z: -6, width: 4.6, depth: 1.1, height: 1.05 };
-export const DJ_SPOT = { x: 0, z: -7.1 };
+export const DJ_SPOT = { x: 0, z: -6.82 }; // close enough to reach the mixer
 
 // Front stairs from the floor up to the stage, one on each side.
 export const FRONT_STAIRS = [-8.75, 8.75].map(x => ({
@@ -51,8 +51,12 @@ export const VIP_DOORS = [-12, 12].map(x => ({ x, z: -2.2, width: 3.2, height: 3
 
 export const SPAWN = { x: 0, z: 15, facing: Math.PI }; // looking towards the stage
 
-// Zone 1: one LED totem per project, laid out on an arc facing the audience.
-export const TOTEM_ARC = { cx: 0, cz: -6, radius: 11, stepDeg: 13, maxDeg: 38 };
+// Zone 1: one small LED totem per project, standing where the crowd would
+// be, on an arc facing the stage. Kept low (TOTEM_SCALE) so the stage, the
+// LED wall and the DJ stay visible above them from the projects station.
+export const TOTEM_ARC = { cx: 0, cz: -6, radius: 11, stepDeg: 9, maxDeg: 34 };
+export const TOTEM_SCALE = 0.744; // 0.62 × 1.2
+export const TOTEM_SCREEN_Y = 1.85 * TOTEM_SCALE; // centre of the screen
 
 export function totemPositions(count) {
     if (count <= 0) return [];
@@ -68,8 +72,8 @@ export function totemPositions(count) {
         const step = Math.min(stepDeg, (2 * maxDeg) / Math.max(1, inRow - 1));
         const deg = (k - (inRow - 1) / 2) * step;
         const a = (deg * Math.PI) / 180;
-        const r = radius + row * 3.2;
-        out.push({ x: cx + r * Math.sin(a), z: cz + r * Math.cos(a), rotY: a });
+        const r = radius + row * 2.4;
+        out.push({ x: cx + r * Math.sin(a), y: TOTEM_SCREEN_Y, z: cz + r * Math.cos(a), rotY: a });
     }
     return out;
 }
@@ -79,10 +83,11 @@ export function totemPositions(count) {
 // camera stands, `target` where it looks. Kept clear of every solid in the
 // plan above (the camera never enters a mesh, so no collision pass needed).
 export const ZONES = [
-    { id: 'projects', num: '01', name: 'PROJETS', where: 'La scène principale',
-      pos: [0, 2.6, 13.5], target: [0, 1.7, 2.5] },
+    { id: 'projects', num: '01', name: 'PROJETS', where: 'Devant la scène',
+      pos: [0, 3.2, 14.2], target: [0, 1.9, -1.5],
+      portrait: { pos: [0, 3.9, 17.6], target: [0, 2.0, -1.5] } }, // narrow screens: step back to fit the arc
     { id: 'dj', num: '02', name: 'LE DJ', where: 'Derrière les platines',
-      pos: [0, 3.0, 0.8], target: [0, 2.0, -7.2] },
+      pos: [0, 2.75, -2.2], target: [0, 2.15, -7.2] },
     { id: 'console', num: '03', name: 'CONSOLE', where: 'La table de mixage',
       pos: [0, 3.3, -3.3], target: [0, 1.7, -6.3] },
     { id: 'backstage', num: '04', name: 'COULISSES', where: "L'arrière de la scène",
@@ -98,14 +103,16 @@ export const CORRIDOR_PATH = [[12, 2.4, 0.5], [12, 2.4, -6], [11.6, 2.5, -11.4]]
 
 // Close-up framing of one totem. `side` shifts the look target so the totem
 // sits in the free part of the screen next to the project panel.
-export function totemView({ x, z, rotY }, side) {
+export function totemView({ x, y, z, rotY }, side) {
     const nx = Math.sin(rotY), nz = Math.cos(rotY);   // totem facing direction
     const rx = Math.cos(rotY), rz = -Math.sin(rotY);  // totem's right
-    const dist = side === 'bottom' ? 5.2 : 4.6;
-    const shiftR = side === 'right' ? 1.5 : 0;
-    const ty = side === 'bottom' ? 1.05 : 1.75;
+    // Bottom sheet (phones): stand back and look down, so the totem sits in
+    // the top third of the screen, above the sheet. Side panel: shift right.
+    const dist = side === 'bottom' ? 5.2 : 5.4;
+    const shiftR = side === 'right' ? 1.8 : 0;
+    const ty = side === 'bottom' ? y - 2.1 : y + 0.3;
     return {
-        pos: [x + nx * dist, 2.0, z + nz * dist],
+        pos: [x + nx * dist, y + 0.25, z + nz * dist],
         target: [x + rx * shiftR, ty, z + rz * shiftR],
     };
 }
