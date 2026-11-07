@@ -134,6 +134,16 @@ document.querySelectorAll('[data-xp-enter]').forEach(el => {
 classicBtn.addEventListener('click', () => {
     closeLanding();
     document.getElementById('hero')?.scrollIntoView();
+    // The button just hid itself: hand focus to the first control of the page.
+    document.getElementById('navBurger')?.focus({ preventScroll: true });
+});
+
+// Escape also works when a click on the backdrop moved focus to <body>.
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && html.classList.contains('xp-landing-on') && !landing.contains(e.target)) {
+        e.preventDefault();
+        classicBtn.click();
+    }
 });
 
 if (html.classList.contains('xp-landing-on')) openLanding();

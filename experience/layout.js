@@ -73,3 +73,39 @@ export function totemPositions(count) {
     }
     return out;
 }
+
+// ---------- Guided navigation ----------
+// Camera stations, one per zone, plus the starting point. `pos` is where the
+// camera stands, `target` where it looks. Kept clear of every solid in the
+// plan above (the camera never enters a mesh, so no collision pass needed).
+export const ZONES = [
+    { id: 'projects', num: '01', name: 'PROJETS', where: 'La scène principale',
+      pos: [0, 2.6, 13.5], target: [0, 1.7, 2.5] },
+    { id: 'dj', num: '02', name: 'LE DJ', where: 'Derrière les platines',
+      pos: [0, 3.0, 0.8], target: [0, 2.0, -7.2] },
+    { id: 'console', num: '03', name: 'CONSOLE', where: 'La table de mixage',
+      pos: [0, 3.3, -3.3], target: [0, 1.7, -6.3] },
+    { id: 'backstage', num: '04', name: 'COULISSES', where: "L'arrière de la scène",
+      pos: [7.4, 2.7, -11.6], target: [0, 1.2, -17.5] },
+];
+export const START_VIEW = { id: 'start', pos: [0, 3.6, 17.2], target: [0, 2.6, -4] };
+
+// The LED wall splits the hall in two. Moving between the front and the
+// backstage goes round it through the stage-right corridor (x 10 → 14),
+// past the VIP door, like a visitor would.
+export const BACK_Z = LED_WALL.z;
+export const CORRIDOR_PATH = [[12, 2.4, 0.5], [12, 2.4, -6], [11.6, 2.5, -11.4]];
+
+// Close-up framing of one totem. `side` shifts the look target so the totem
+// sits in the free part of the screen next to the project panel.
+export function totemView({ x, z, rotY }, side) {
+    const nx = Math.sin(rotY), nz = Math.cos(rotY);   // totem facing direction
+    const rx = Math.cos(rotY), rz = -Math.sin(rotY);  // totem's right
+    const dist = side === 'bottom' ? 5.2 : 4.6;
+    const shiftR = side === 'right' ? 1.5 : 0;
+    const ty = side === 'bottom' ? 1.05 : 1.75;
+    return {
+        pos: [x + nx * dist, 2.0, z + nz * dist],
+        target: [x + rx * shiftR, ty, z + rz * shiftR],
+    };
+}

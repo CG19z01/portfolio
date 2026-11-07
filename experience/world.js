@@ -1,11 +1,11 @@
-// Builds the venue. Segment 1 = blocking-out ("greybox") of the whole hall:
-// real proportions, real zone positions, palette lighting — final materials,
-// characters and interactions come in later segments.
+// Builds the venue: hall shell, stage, LED wall, booth, lights, backstage.
+// Zone content (project totems, DJ, console, contacts) lives in its own
+// module and is added on top.
 
 import * as THREE from 'three';
 import {
     PALETTE, HALL, STAGE, LED_WALL, BOOTH, DJ_SPOT, FRONT_STAIRS, REAR_STAIRS,
-    BACKSTAGE, BOOKING_DESK, VIP_DOORS, SPAWN, totemPositions,
+    BOOKING_DESK, VIP_DOORS,
 } from './layout.js';
 
 const mat = {
@@ -114,7 +114,7 @@ function beam(color, length, radius) {
     return m;
 }
 
-export function buildWorld(scene, { projectCount }) {
+export function buildWorld(scene) {
     const world = new THREE.Group();
     const animated = []; // (t) => void
 
@@ -216,22 +216,7 @@ export function buildWorld(scene, { projectCount }) {
     });
     [-6.2, 6.2].forEach(x => world.add(box(1.4, 1.1, 1.0, mat.black, x, 0, -1.45)));
 
-    // ---------- Zone 1: project totems ----------
-    totemPositions(projectCount).forEach(({ x, z, rotY }) => {
-        const g = new THREE.Group();
-        g.add(box(0.12, 0.5, 0.5, mat.metal, 0, 0, 0));
-        const frame = box(1.7, 2.4, 0.18, mat.black, 0, 0.5, 0);
-        g.add(frame);
-        const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.6), new THREE.MeshStandardMaterial({
-            color: 0x000000, emissive: PALETTE.purpleDark, emissiveIntensity: 0.9,
-        }));
-        screen.position.set(0, 1.85, 0.1);
-        g.add(screen);
-        g.add(box(1.5, 0.03, 0.03, mat.stageEdge, 0, 0.75, 0.1));
-        g.position.set(x, 0, z);
-        g.rotation.y = rotY;
-        world.add(g);
-    });
+    // Zone 1 totems are built by projects.js from the API data.
 
     // ---------- Zone 4: backstage ----------
     world.add(box(BOOKING_DESK.width, BOOKING_DESK.height, BOOKING_DESK.depth, mat.case, BOOKING_DESK.x, 0, BOOKING_DESK.z));
@@ -265,15 +250,6 @@ export function buildWorld(scene, { projectCount }) {
         world.add(box(width + 0.2, 0.2, 0.3, mat.stageEdge, x, height, z));
     });
 
-    // Spawn marker
-    const ring = new THREE.Mesh(new THREE.RingGeometry(0.7, 0.85, 48), new THREE.MeshBasicMaterial({ color: PALETTE.purple }));
-    ring.rotation.x = -Math.PI / 2;
-    ring.position.set(SPAWN.x, 0.02, SPAWN.z);
-    world.add(ring);
-    const avatar = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 1.1, 6, 12), new THREE.MeshStandardMaterial({ color: PALETTE.text, roughness: 0.6 }));
-    avatar.position.set(SPAWN.x, 0.85, SPAWN.z);
-    world.add(avatar);
-
     // ---------- Lighting ----------
     world.add(new THREE.HemisphereLight(PALETTE.lavender, PALETTE.glow, 1.6));
     world.add(new THREE.AmbientLight(PALETTE.text, 0.25));
@@ -290,18 +266,13 @@ export function buildWorld(scene, { projectCount }) {
     backWash.position.set(0, 5, -15);
     world.add(backWash);
 
-    // ---------- Zone signs (overview only, for validating the layout) ----------
+    // ---------- Signs (the HUD names the zones; these mark the way round) ----------
     const signs = new THREE.Group();
     const addSign = (text, x, y, z, size) => {
         const s = label(text, { size });
         s.position.set(x, y, z);
         signs.add(s);
     };
-    addSign('1 · PROJETS', 0, 4.2, 4, 1.1);
-    addSign('2 · LE DJ', 0, 4.4, -7.4, 0.9);
-    addSign('3 · CONSOLE', 0, 3.0, -4.6, 0.8);
-    addSign('4 · COULISSES', 0, 3.4, -16.5, 1.1);
-    addSign('DÉPART', SPAWN.x, 2.4, SPAWN.z, 0.7);
     addSign('VIP', -12, 4.1, -2.2, 0.6);
     addSign('VIP', 12, 4.1, -2.2, 0.6);
     world.add(signs);
