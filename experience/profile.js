@@ -2,7 +2,9 @@
 //
 // Content is copied word for word from cv-charles-gillet.pdf and from the
 // "À propos" section of index.html. Phone and e-mail are deliberately left
-// out (contact goes through the backstage). If the CV or the About text
+// out (contact goes through the backstage), and so is the About paragraph
+// ("Je vois le code comme une partition…", removed at the user's request,
+// 2026-11-07; it stays on the classic page). If the CV or the About text
 // changes, update this file too.
 
 const PROFILE = {
@@ -12,7 +14,6 @@ const PROFILE = {
     about: {
         headline: ["Coder n'est pas", 'juste taper.'],
         accent: "C'est composer.",
-        body: "Je vois le code comme une partition. Chaque fonction est un instrument, chaque ligne de CSS donne le rythme, et chaque projet raconte une histoire. Mes applications ne se contentent pas de fonctionner : elles résonnent avec l'utilisateur.",
     },
     objective: "Souhaitant intervenir sur l'ensemble du cycle de développement d'applications web, alliant sens du détail, créativité côté front-end et robustesse côté back-end, pour créer des solutions performantes, évolutives pour l'utilisateur.",
     experiences: [
@@ -58,7 +59,6 @@ function tabContent(id) {
     if (id === 'parcours') {
         return `
           <p class="xp-about-head">${P.about.headline.map(esc).join('<br>')}<br><span>${esc(P.about.accent)}</span></p>
-          <p class="xp-panel-desc">${esc(P.about.body)}</p>
           <h3 class="xp-sub">Objectif</h3>
           <p class="xp-panel-desc">${esc(P.objective)}</p>
           <h3 class="xp-sub">Expériences</h3>

@@ -47,13 +47,16 @@ export const BACKSTAGE = { minX: -14, maxX: 14, minZ: -22, maxZ: -10 };
 export const BOOKING_DESK = { x: 0, z: -16.5, width: 3.2, depth: 1.2, height: 0.9 };
 
 // Audience stands on both sides of the stage (where the VIP door frames
-// were): raised balconies over the two side corridors (|x| 10 → 14). The
-// corridors stay open underneath: the camera's way to the backstage runs
-// at y ≈ 2.5 along x 12, a metre below the balcony floor (≈ 3.56). The
-// supporting columns stand at the corridor edges only, never in the middle.
+// were): raised balconies over the two side corridors (|x| 10 → 14), from
+// the back of the stage to well into the room. The corridors stay open
+// underneath: the camera's way to the backstage runs at y ≈ 2.5 along
+// x 12, at least half a metre below the balcony frame (3.2). Columns stand
+// at the corridor edges only; in front of the stage (z > FRONT_COLS_TO) the
+// inner edge is cantilevered, because the camera enters the corridor there.
 export const STANDS = {
-    fromZ: -9.3, toZ: -1.7, innerX: 10.2, wallX: 14,
-    rows: 4, rowDepth: 0.9, rise: 0.42, baseY: 3.7, aisle: 1.2,
+    fromZ: -9.3, toZ: 3.5, innerX: 10.2, wallX: 14,
+    rows: 5, rowDepth: 0.76, rise: 0.45, baseY: 3.7, aisle: 1.2,
+    frontColsTo: -0.5,
 };
 
 // Dressing-room corner of the backstage, along the back wall, clear of the

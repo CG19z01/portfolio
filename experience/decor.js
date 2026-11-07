@@ -82,20 +82,24 @@ export function buildStands() {
         // Steel frame: columns at both corridor edges (the middle stays free
         // for the way to the backstage), cross beams under the deck, and
         // bracing between the outer columns.
+        const nCols = Math.round(L / 2.4);
         const cols = [];
-        for (let i = 0; i <= 3; i++) cols.push(S.fromZ + 0.2 + (i * (L - 0.4)) / 3);
+        for (let i = 0; i <= nCols; i++) cols.push(S.fromZ + 0.2 + (i * (L - 0.4)) / nCols);
+        const front = cols.filter(z => z <= S.frontColsTo); // inner-edge columns stop before the camera's way in
         const colTop = under - 0.36;
-        [S.innerX + 0.12, S.wallX - 0.14].forEach(cx => cols.forEach(z =>
-            addBox(mg, C.steel, 0.16, colTop, 0.16, X(cx), 0, z)));
+        cols.forEach(z => addBox(mg, C.steel, 0.16, colTop, 0.16, X(S.wallX - 0.14), 0, z));
+        front.forEach(z => addBox(mg, C.steel, 0.16, colTop, 0.16, X(S.innerX + 0.12), 0, z));
         cols.forEach(z => addBox(mg, C.steel, S.wallX - S.innerX, 0.22, 0.16, X((S.innerX + S.wallX) / 2), colTop, z));
         addBox(mg, C.steel, 0.12, 0.22, L, X(S.wallX - 0.14), colTop, zc);
-        const span = cols[1] - cols[0];
+        // Edge beam carrying the cantilevered front part
+        addBox(mg, C.steel, 0.14, 0.22, L, X(S.innerX + 0.12), colTop, zc);
         const bh = colTop - 0.6;           // bracing between 0.6 m and the top
-        const len = Math.hypot(span, bh);
-        const ang = Math.atan2(bh, span);
-        for (let i = 0; i < cols.length - 1; i++) {
+        for (let i = 0; i < front.length - 1; i++) {
+            const span = front[i + 1] - front[i];
+            const len = Math.hypot(span, bh);
+            const ang = Math.atan2(bh, span);
             [ang, -ang].forEach(a => mg.add(T.box, C.steel,
-                [X(S.innerX + 0.12), 0.6 + bh / 2, (cols[i] + cols[i + 1]) / 2], [a, 0, 0], [0.05, 0.05, len]));
+                [X(S.innerX + 0.12), 0.6 + bh / 2, (front[i] + front[i + 1]) / 2], [a, 0, 0], [0.05, 0.05, len]));
         }
         // Front safety rail: posts, top rail with a light line, mid rail
         const n = Math.round(L / 1.1) + 1;
