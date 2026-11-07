@@ -893,6 +893,25 @@
 }
 .xp-mix-db { flex: 0 0 3.2rem; text-align: right; }
 
+/* ---------- Zone 4: booking form ---------- */
+.xp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1.2rem 0 .4rem;
+}
+.xp-form .form-textarea { height: 120px; }
+.xp-form .btn-submit[aria-disabled="true"] { opacity: .6; cursor: progress; }
+.xp-form-status {
+    min-height: 1.2em;
+    margin: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: .7rem;
+    color: var(--muted);
+}
+.xp-form-status[data-kind="ok"] { color: var(--purple); }
+.xp-form-status[data-kind="error"] { color: #ee0055; }
+
 @media (max-width: 759px) {
     .xp-hud-top {
         padding: 0 .75rem;

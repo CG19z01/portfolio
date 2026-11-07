@@ -8,7 +8,8 @@ import { createGuide } from './guide.js';
 import { createProjectsZone } from './projects.js';
 import { createLedWall } from './ledwall.js';
 import { createDJ } from './dj.js';
-import { ZONES, START_VIEW, totemView, djPanelView, consoleView } from './layout.js';
+import { ZONES, START_VIEW, totemView, djPanelView, consoleView, bookingView } from './layout.js';
+import { createBackstage } from './backstage.js';
 import { createConsoleZone } from './console.js';
 import { createProfilePanel } from './profile.js';
 
@@ -60,7 +61,7 @@ const ZONE_NOTES = {
     projects: 'Cliquez sur un écran ou un titre de la setlist pour ouvrir un projet.',
     dj: 'Cliquez sur le DJ pour ouvrir sa présentation.',
     console: 'Une compétence par canal, au niveau réglé dans le portfolio. Cliquez sur un canal.',
-    backstage: 'Zone en préparation : les contacts arrivent bientôt.',
+    backstage: 'Cliquez sur le bureau de booking pour me laisser un message.',
 };
 
 let active = null;
@@ -73,7 +74,7 @@ export async function startExperience({ onExit } = {}) {
     // Everything created so far, so teardown works at any point — including
     // halfway through a failed start, or a click on "Version classique"
     // while the scene is still loading.
-    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, profile: null, mixer: null, cleanups: [], closed: false };
+    const state = { renderer: null, guide: null, world: null, zone: null, led: null, dj: null, profile: null, mixer: null, booking: null, cleanups: [], closed: false };
     let root = null;
     let restoreInert = () => {};
 
@@ -88,6 +89,7 @@ export async function startExperience({ onExit } = {}) {
         state.dj?.dispose();
         state.profile?.dispose();
         state.mixer?.dispose();
+        state.booking?.dispose();
         state.world?.dispose();
         if (state.renderer) {
             state.renderer.dispose();
@@ -168,12 +170,15 @@ export async function startExperience({ onExit } = {}) {
         state.dj = createDJ(scene);
         const mixer = createConsoleZone({ scene, root, skills, error: skillsError });
         state.mixer = mixer;
+        const booking = createBackstage({ scene, root, onClose: () => closeBooking() });
+        state.booking = booking;
 
         // ---------- Picking (hover + click on totems and on the DJ) ----------
         const raycaster = new THREE.Raycaster();
         const ndc = new THREE.Vector2();
-        const pickables = [...zone1.pickables, ...state.dj.pickables, ...mixer.pickables];
+        const pickables = [...zone1.pickables, ...state.dj.pickables, ...mixer.pickables, ...booking.pickables];
         const djMeshes = new Set(state.dj.pickables);
+        const deskMeshes = new Set(booking.pickables);
         function pick(x, y) {
             const r = canvas.getBoundingClientRect();
             ndc.set(((x - r.left) / r.width) * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
@@ -181,6 +186,7 @@ export async function startExperience({ onExit } = {}) {
             const hit = raycaster.intersectObjects(pickables, false)[0];
             if (!hit) return null;
             if (djMeshes.has(hit.object)) return { dj: true };
+            if (deskMeshes.has(hit.object)) return { desk: true };
             if (hit.object.userData.channel !== undefined) return { channel: hit.object.userData.channel };
             return { totem: hit.object.userData.totem };
         }
@@ -240,10 +246,19 @@ export async function startExperience({ onExit } = {}) {
             if (!stay) goZone('console');
         }
 
+        function closeBooking({ stay = false } = {}) {
+            if (!booking.isOpen) return;
+            booking.close();
+            root.classList.remove('xp-has-panel');
+            restoreFocus();
+            if (!stay) goZone('backstage', { present: false });
+        }
+
         function closePanels() {
             closeProject({ stay: true });
             closeProfile({ stay: true });
             closeSkill({ stay: true });
+            closeBooking({ stay: true });
         }
 
         // Arriving at the DJ opens his presentation (the zone's content);
@@ -251,6 +266,10 @@ export async function startExperience({ onExit } = {}) {
         function goZone(id, { present = true } = {}) {
             if (id === 'dj' && present) {
                 openProfile();
+                return;
+            }
+            if (id === 'backstage' && present) {
+                openBooking();
                 return;
             }
             closePanels();
@@ -264,6 +283,7 @@ export async function startExperience({ onExit } = {}) {
             if (i < 0 || i >= zone1.count) return;
             closeProfile({ stay: true });
             closeSkill({ stay: true });
+            closeBooking({ stay: true });
             if (!zone1.isOpen) returnFocus = from || document.activeElement;
             setZone('projects');
             zone1.open(i);
@@ -275,6 +295,7 @@ export async function startExperience({ onExit } = {}) {
         function openProfile(from) {
             closeProject({ stay: true });
             closeSkill({ stay: true });
+            closeBooking({ stay: true });
             if (!profile.isOpen) returnFocus = from || document.activeElement;
             setZone('dj');
             profile.open();
@@ -286,11 +307,23 @@ export async function startExperience({ onExit } = {}) {
             if (i < 0 || i >= mixer.count) return;
             closeProject({ stay: true });
             closeProfile({ stay: true });
+            closeBooking({ stay: true });
             if (!mixer.isOpen) returnFocus = from || document.activeElement;
             setZone('console');
             mixer.open(i);
             root.classList.add('xp-has-panel');
             state.guide.goTo(consoleView(mixer.place(i), panelSide()));
+        }
+
+        function openBooking(from) {
+            closeProject({ stay: true });
+            closeProfile({ stay: true });
+            closeSkill({ stay: true });
+            if (!booking.isOpen) returnFocus = from || document.activeElement;
+            setZone('backstage');
+            booking.open();
+            root.classList.add('xp-has-panel');
+            state.guide.goTo(bookingView(panelSide()));
         }
 
         mixer.on({
@@ -315,6 +348,7 @@ export async function startExperience({ onExit } = {}) {
             onTap(x, y) {
                 const hit = pick(x, y);
                 if (hit?.dj) openProfile(canvas);
+                else if (hit?.desk) openBooking(canvas);
                 else if (hit?.channel !== undefined) openSkill(hit.channel, canvas);
                 else if (hit) openProject(hit.totem, canvas);
             },
@@ -323,6 +357,7 @@ export async function startExperience({ onExit } = {}) {
                 zone1.setHover(hit?.totem ?? -1);
                 mixer.setHover(hit?.channel ?? -1);
                 state.dj.setHover(!!hit?.dj);
+                booking.setHover(!!hit?.desk);
                 canvas.classList.toggle('is-pointing', !!hit);
                 document.body.classList.toggle('cursor-hover', !!hit);
             },
@@ -334,10 +369,11 @@ export async function startExperience({ onExit } = {}) {
             if (e.altKey || e.ctrlKey || e.metaKey) return;
             const inField = e.target.closest('input, textarea, select');
             if (e.key === 'Escape') {
-                if (zone1.isOpen || profile.isOpen || mixer.isOpen) {
+                if (zone1.isOpen || profile.isOpen || mixer.isOpen || booking.isOpen) {
                     e.preventDefault();
                     if (zone1.isOpen) closeProject();
                     else if (mixer.isOpen) closeSkill();
+                    else if (booking.isOpen) closeBooking();
                     else closeProfile();
                 }
                 return;
@@ -367,6 +403,7 @@ export async function startExperience({ onExit } = {}) {
             if (zone1.isOpen) state.guide.goTo(totemView(zone1.place(zone1.active), panelSide()));
             if (profile.isOpen) state.guide.goTo(djPanelView(panelSide()));
             if (mixer.isOpen) state.guide.goTo(consoleView(mixer.place(mixer.active), panelSide()));
+            if (booking.isOpen) state.guide.goTo(bookingView(panelSide()));
         });
 
         // Arrival: from high above the crowd down to the entrance.
@@ -385,12 +422,13 @@ export async function startExperience({ onExit } = {}) {
             state.led.update(dt);
             state.dj.update(t, dt);
             mixer.update(t, dt);
+            booking.update(t, dt);
             renderer.render(scene, camera);
         });
 
         // Test hook for automated screenshots only (?xpdebug in the URL).
         if (new URLSearchParams(location.search).has('xpdebug')) {
-            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
+            window.__xp = { goZone, openProject, closeProject, openProfile, closeProfile, openSkill, closeSkill, openBooking, closeBooking, view: v => state.guide.goTo(v, { instant: true }), get travelling() { return state.guide.travelling; } };
         }
 
         requestAnimationFrame(() => root.querySelector('.xp-loader').classList.add('is-done'));

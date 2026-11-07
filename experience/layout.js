@@ -128,6 +128,13 @@ export function consoleView({ x }, side) {
         : { pos: [x * 0.5 + 0.35, 3.4, -3.2], target: [x * 0.5 + 0.6, 1.6, -6.3] };
 }
 
+// Framing of the booking desk next to the booking panel.
+export function bookingView(side) {
+    return side === 'bottom'
+        ? { pos: [0, 3.5, -10.9], target: [0, -0.4, -16.6] }
+        : { pos: [-0.6, 2.9, -11.0], target: [1.9, 1.4, -16.6] };
+}
+
 export function djPanelView(side) {
     return side === 'bottom'
         ? { pos: [0, 3.3, -0.4], target: [0, -0.4, -7.0] }
