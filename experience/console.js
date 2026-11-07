@@ -155,8 +155,9 @@ export function createConsoleZone({ scene, root, skills, error }) {
             ctx.fillRect(cx - 3, fb - shown[i] * (fb - ft), 6, shown[i] * (fb - ft));
             // Label: name + level (same "dB" wording as the classic page)
             ctx.fillStyle = glow > 0.5 ? '#ffffff' : '#f0eefa';
-            fitFont(ctx, s.name.toUpperCase(), cw - 16, 46, "'Bebas Neue', sans-serif");
-            ctx.fillText(s.name.toUpperCase(), cx, py(STRIP.label) - 14);
+            const label = String(s.name ?? '').toUpperCase(); // the API does not type-check names
+            fitFont(ctx, label, cw - 16, 46, "'Bebas Neue', sans-serif");
+            ctx.fillText(label, cx, py(STRIP.label) - 14);
             ctx.fillStyle = '#b06aff';
             ctx.font = "400 22px 'IBM Plex Mono', monospace";
             ctx.fillText(`${clampPct(s.pct)} dB`, cx, py(STRIP.label) + 26);

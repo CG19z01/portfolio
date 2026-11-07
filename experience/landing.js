@@ -18,7 +18,7 @@ const classicBtn = document.getElementById('xpClassic');
 const note = document.getElementById('xpLandingNote');
 
 // Download the 3D code as soon as the visitor shows intent (pointer over
-// "Entrer", finger down, key pressed on it) instead of on the click: by the
+// "Entrer", finger down, Enter/Space pressed on it) instead of on the click: by the
 // time the click lands, most of it is already there. Not on focus: the
 // landing focuses "Entrer" itself, so every visitor would pay for it.
 // Visitors who stay on the classic page never trigger it. A failed load is
@@ -31,8 +31,13 @@ function warmUp() {
     });
     return warm;
 }
-['pointerenter', 'touchstart', 'keydown'].forEach(type => {
+['pointerenter', 'touchstart'].forEach(type => {
     enterBtn.addEventListener(type, () => { warmUp().catch(() => {}); }, { once: true, passive: true });
+});
+// Keyboard: only the keys that activate the button (Tab or Escape on the
+// auto-focused "Entrer" mean the visitor is going elsewhere).
+enterBtn.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') warmUp().catch(() => {});
 });
 
 function hasWebGL() {

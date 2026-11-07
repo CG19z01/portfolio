@@ -1099,6 +1099,14 @@
 }
 @media (prefers-reduced-motion: reduce) {
     .xp-tuto, .xp-tuto-focus { animation: none; }
+    .live-dot { animation: none; } /* also on the classic page */
+}
+/* Touch screens: comfortable 44 px targets for the HUD controls */
+@media (max-width: 759px) {
+    .xp-hud-btn,
+    .xp-tabs [role="tab"] { min-height: 44px; }
+    .xp-icon-btn { width: 44px; height: 44px; }
+    .xp-help { width: 44px; height: 44px; }
 }
 
 /* The rules above give these a display value, which would beat [hidden]. */

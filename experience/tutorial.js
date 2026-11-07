@@ -34,6 +34,7 @@ function steps(touch) {
 export function createTutorial({ root, touch }) {
     const STEPS = steps(touch);
     let step = 0;
+    let opener = null; // focus goes back there on close
 
     const card = document.createElement('div');
     card.className = 'xp-tuto';
@@ -89,6 +90,7 @@ export function createTutorial({ root, touch }) {
             try { return localStorage.getItem(KEY) === '1'; } catch { return false; }
         },
         open() {
+            if (card.hidden) opener = root.contains(document.activeElement) ? document.activeElement : null;
             show(0);
             root.classList.add('xp-has-tuto');
             card.hidden = false;
@@ -101,7 +103,8 @@ export function createTutorial({ root, touch }) {
             root.classList.remove('xp-has-tuto');
             mark(null);
             remember();
-            if (focus) root.focus({ preventScroll: true });
+            if (focus) (opener?.isConnected ? opener : root).focus({ preventScroll: true });
+            opener = null;
         },
         dispose() {
             mark(null);

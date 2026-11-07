@@ -34,7 +34,7 @@ function buildShell(onQuit) {
     const root = document.createElement('div');
     root.className = 'xp-root';
     root.tabIndex = -1;
-    root.setAttribute('role', 'application');
+    root.setAttribute('role', 'region');
     root.setAttribute('aria-label', 'Salle de concert en 3D');
     root.innerHTML = `
       <div class="xp-hud-top">
@@ -229,8 +229,13 @@ export async function startExperience({ onExit } = {}) {
         // A panel taking the stage ends the tutorial (the panel gets the focus).
         listen(root, 'xp-panel-open', () => tutorial.close({ focus: false }));
 
+        // Back to what opened the panel. A click in the 3D scene leaves the
+        // canvas (not focusable) as the opener: the hall itself takes the
+        // focus then, so the keyboard shortcuts keep working.
         function restoreFocus() {
-            (returnFocus?.isConnected ? returnFocus : root).focus({ preventScroll: true });
+            const back = returnFocus?.isConnected && returnFocus !== canvas ? returnFocus : root;
+            back.focus({ preventScroll: true });
+            if (!root.contains(document.activeElement)) root.focus({ preventScroll: true });
             returnFocus = null;
         }
 
