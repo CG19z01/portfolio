@@ -13,7 +13,7 @@ import { PALETTE, STAGE, BOOTH, DJ_SPOT } from './layout.js';
 const COLORS = {
     skin: 0xe8c4a4,
     beard: 0x6e4a32,
-    brow: 0x4a3122,
+    brow: 0x7d5a40,
     eye: 0x2a2620,
     polo: 0x17171d,
     collar: 0x202028,
@@ -21,6 +21,48 @@ const COLORS = {
 };
 
 const BPM = 122;
+
+// Beard band laid on the head ellipsoid. `a` is the angle round the head
+// from the front (0) to just in front of the ears; `v` runs across the band
+// from its upper edge (cheek line) to its lower edge (jaw line). Polar angle
+// theta is measured from the top of the head (0) to the bottom (PI).
+function createBeardGeometry(HEAD, segA = 32, segV = 8) {
+    const A_MAX = 1.42; // stops in front of the ears (ears at PI / 2)
+    const smooth = x => x * x * (3 - 2 * x);
+    const lerp = (p, q, k) => p + (q - p) * k;
+    const pos = [];
+    for (let i = 0; i <= segA; i++) {
+        const a = -A_MAX + (2 * A_MAX * i) / segA;
+        const k = smooth(Math.abs(a) / A_MAX); // 0 at the chin, 1 at the ears
+        // Upper edge rises from just under the mouth to ear level; lower edge
+        // goes from under the chin up to a thin sideburn.
+        const top = Math.PI * lerp(0.63, 0.48, k);
+        const bot = Math.PI * lerp(0.86, 0.56, Math.pow(Math.abs(a) / A_MAX, 2.2)); // convex jaw line
+        const thick = lerp(0.045, 0.01, k);
+        for (let j = 0; j <= segV; j++) {
+            const v = j / segV;
+            const th = lerp(top, bot, v);
+            const r = HEAD.r * (1.006 + thick * Math.sin(Math.PI * v));
+            pos.push(
+                r * Math.sin(a) * Math.sin(th) * HEAD.sx,
+                r * Math.cos(th) * HEAD.sy,
+                r * Math.cos(a) * Math.sin(th) * HEAD.sz,
+            );
+        }
+    }
+    const idx = [];
+    for (let i = 0; i < segA; i++) {
+        for (let j = 0; j < segV; j++) {
+            const p = i * (segV + 1) + j, q = p + segV + 1;
+            idx.push(p, p + 1, q, q, p + 1, q + 1);
+        }
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    geo.setIndex(idx);
+    geo.computeVertexNormals();
+    return geo;
+}
 
 export function createDJ(scene) {
     const mats = {
@@ -93,27 +135,19 @@ export function createDJ(scene) {
     head.position.set(0, 0.74, 0.01); // pivot at the top of the neck
     body.add(head);
     const face = new THREE.Group();
-    face.position.y = 0.13; // centre of the skull above the pivot
+    face.position.y = 0.115; // centre of the skull above the pivot
     head.add(face);
 
-    const HEAD = { r: 0.105, sx: 0.9, sy: 1.3, sz: 1.0 };
+    const HEAD = { r: 0.105, sx: 0.93, sy: 1.14, sz: 1.0 };
     const skull = mesh(new THREE.SphereGeometry(HEAD.r, 24, 18), mats.skin);
     skull.scale.set(HEAD.sx, HEAD.sy, HEAD.sz);
     face.add(skull);
 
-    // Beard: lower shell of a slightly larger ellipsoid, open at the back
-    // (it runs along the jaw up to the ears, like on the photo), plus a
-    // rounded chin.
-    const beardGeo = new THREE.SphereGeometry(HEAD.r * 1.08, 20, 14,
-        Math.PI / 2 - 2.05, 4.1,        // phi: front 235°
-        Math.PI * 0.56, Math.PI * 0.44); // theta: from cheekbones down
-    const beard = mesh(beardGeo, mats.beard);
-    beard.scale.set(HEAD.sx * 1.02, HEAD.sy, HEAD.sz * 1.04);
-    face.add(beard);
-    const chin = mesh(new THREE.SphereGeometry(0.062, 12, 10), mats.beard, 0, -0.118, 0.045);
-    chin.scale.set(1.1, 0.85, 1);
-    face.add(chin);
-    const stache = mesh(new THREE.CapsuleGeometry(0.013, 0.05, 3, 8), mats.beard, 0, -0.04, 0.1);
+    // Beard: a band on the skull surface that starts as a thin sideburn in
+    // front of each ear and widens progressively down to the mouth and chin.
+    // Its lower edge follows the jaw, so nothing grows on the neck.
+    face.add(mesh(createBeardGeometry(HEAD), mats.beard));
+    const stache = mesh(new THREE.CapsuleGeometry(0.011, 0.046, 3, 8), mats.beard, 0, -0.04, 0.097);
     stache.rotation.z = Math.PI / 2;
     face.add(stache);
 
@@ -126,9 +160,21 @@ export function createDJ(scene) {
 
     // Brows, eyes, nose — small, just enough to read a face
     [-1, 1].forEach(s => {
-        const brow = mesh(new THREE.BoxGeometry(0.042, 0.009, 0.012), mats.brow, s * 0.038, 0.05, 0.096);
-        brow.rotation.z = s * -0.12;
-        face.add(brow);
+        // Rounded arch for a kind, happy expression: the inner end sits a
+        // little higher than the outer one. The curve is laid on the
+        // forehead (mirrored per side) and the ends are capped.
+        const BROW_R = 0.0065;
+        const pts = [];
+        for (let i = 0; i <= 8; i++) {
+            const u = i / 8; // 0 = inner end, 1 = outer end
+            const x = s * (0.016 + 0.048 * u);
+            const y = 0.052 + 0.012 * Math.sin(Math.PI * u) - 0.008 * u;
+            const q = 1 - (x / (HEAD.r * HEAD.sx)) ** 2 - (y / (HEAD.r * HEAD.sy)) ** 2;
+            pts.push(new THREE.Vector3(x, y, HEAD.r * HEAD.sz * Math.sqrt(Math.max(q, 0)) + 0.003));
+        }
+        const curve = new THREE.CatmullRomCurve3(pts);
+        face.add(mesh(new THREE.TubeGeometry(curve, 20, BROW_R, 6, false), mats.brow));
+        [pts[0], pts[8]].forEach(p => face.add(mesh(new THREE.SphereGeometry(BROW_R, 8, 6), mats.brow, p.x, p.y, p.z)));
         face.add(mesh(new THREE.SphereGeometry(0.01, 8, 6), mats.eye, s * 0.036, 0.024, 0.097));
     });
     const nose = mesh(new THREE.SphereGeometry(0.018, 10, 8), mats.skin, 0, -0.004, 0.104);
