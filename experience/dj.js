@@ -114,7 +114,7 @@ export function createDJ(scene) {
     body.add(mesh(new THREE.BoxGeometry(0.035, 0.12, 0.01), mats.collar, 0, 0.53, 0.112));
 
     // Neck
-    body.add(mesh(new THREE.CylinderGeometry(0.05, 0.056, 0.14, 10), mats.skin, 0, 0.66, 0));
+    body.add(mesh(new THREE.CylinderGeometry(0.05, 0.056, 0.1, 10), mats.skin, 0, 0.605, 0));
 
     // Headphones resting round the neck
     const band = mesh(new THREE.TorusGeometry(0.1, 0.013, 6, 24, Math.PI * 1.25), mats.phones, 0, 0.64, 0.01);
@@ -132,13 +132,13 @@ export function createDJ(scene) {
 
     // ---------- Head (long, shaved, bearded) ----------
     const head = new THREE.Group();
-    head.position.set(0, 0.74, 0.01); // pivot at the top of the neck
+    head.position.set(0, 0.66, 0.01); // pivot at the top of the neck
     body.add(head);
     const face = new THREE.Group();
-    face.position.y = 0.115; // centre of the skull above the pivot
+    face.position.y = 0.12; // centre of the skull above the pivot
     head.add(face);
 
-    const HEAD = { r: 0.105, sx: 0.93, sy: 1.14, sz: 1.0 };
+    const HEAD = { r: 0.105, sx: 0.93, sy: 1.22, sz: 1.0 };
     const skull = mesh(new THREE.SphereGeometry(HEAD.r, 24, 18), mats.skin);
     skull.scale.set(HEAD.sx, HEAD.sy, HEAD.sz);
     face.add(skull);
